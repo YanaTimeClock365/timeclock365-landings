@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>One Badge. One System. No More Double Tracking. — TimeClock 365</title>
+<meta name="description" content="TimeClock 365 combines door access control and time tracking in one system. Eliminate buddy punching, reduce payroll errors, and stay audit-ready.">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; color: #1a1a1a; background: #fff; }
+
+/* NAV */
+nav { background: #fff; border-bottom: 1px solid #eee; padding: 14px 32px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+.logo { font-weight: 700; font-size: 16px; color: #1a1a1a; text-decoration: none; }
+.logo span { color: #3479E9; }
+.nav-cta { background: #3479E9; color: #fff; padding: 9px 20px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: 600; }
+
+/* HERO */
+.hero { background: linear-gradient(135deg, #f0f4ff 0%, #fff 60%); padding: 80px 32px 72px; text-align: center; }
+.hero h1 { font-size: clamp(32px, 5vw, 52px); font-weight: 800; line-height: 1.15; color: #0d1117; max-width: 720px; margin: 0 auto 24px; }
+.hero h1 span { color: #3479E9; }
+.hero p { font-size: 18px; color: #555; max-width: 580px; margin: 0 auto 36px; line-height: 1.7; }
+.hero-cta { background: #3479E9; color: #fff; padding: 16px 36px; border-radius: 8px; text-decoration: none; font-size: 16px; font-weight: 700; display: inline-block; }
+.hero-cta:hover { background: #2563d4; }
+.hero-sub { font-size: 13px; color: #999; margin-top: 14px; }
+
+/* LOGOS */
+.logos { padding: 28px 32px; text-align: center; border-bottom: 1px solid #f0f0f0; }
+.logos p { font-size: 12px; color: #bbb; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
+.logo-strip { display: flex; gap: 36px; justify-content: center; align-items: center; flex-wrap: wrap; }
+.logo-strip span { font-size: 13px; color: #ccc; font-weight: 600; }
+
+/* BENEFITS */
+.benefits { padding: 72px 32px; max-width: 960px; margin: 0 auto; }
+.benefits h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: #3479E9; font-weight: 700; margin-bottom: 8px; text-align: center; }
+.benefits h3 { font-size: clamp(24px, 3.5vw, 36px); font-weight: 800; text-align: center; margin-bottom: 56px; color: #0d1117; }
+
+.benefit-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 40px; }
+@media(max-width:720px) { .benefit-grid { grid-template-columns: 1fr; } }
+
+.benefit-card { padding: 32px; background: #f8faff; border-radius: 12px; border: 1px solid #e8eeff; }
+.benefit-icon { font-size: 28px; margin-bottom: 16px; }
+.benefit-card h4 { font-size: 18px; font-weight: 700; margin-bottom: 12px; color: #0d1117; }
+.benefit-card p { font-size: 14px; line-height: 1.75; color: #555; }
+
+/* PROBLEM */
+.problem { background: #0d1117; color: #fff; padding: 64px 32px; text-align: center; }
+.problem h2 { font-size: clamp(22px, 3.5vw, 34px); font-weight: 800; margin-bottom: 20px; }
+.problem p { font-size: 16px; color: rgba(255,255,255,0.7); max-width: 600px; margin: 0 auto 40px; line-height: 1.7; }
+.stat-row { display: flex; gap: 48px; justify-content: center; flex-wrap: wrap; }
+.stat { text-align: center; }
+.stat-num { font-size: 42px; font-weight: 800; color: #3479E9; }
+.stat-label { font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 4px; }
+
+/* HOW IT WORKS */
+.how { padding: 72px 32px; max-width: 860px; margin: 0 auto; }
+.how h2 { text-align: center; font-size: clamp(22px,3.5vw,34px); font-weight: 800; margin-bottom: 48px; color: #0d1117; }
+.steps { display: flex; flex-direction: column; gap: 32px; }
+.step { display: flex; gap: 24px; align-items: flex-start; }
+.step-num { background: #3479E9; color: #fff; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; flex-shrink: 0; }
+.step-body h4 { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+.step-body p  { font-size: 14px; color: #555; line-height: 1.7; }
+
+/* PROOF */
+.proof { background: #f8faff; padding: 64px 32px; text-align: center; }
+.quote { max-width: 640px; margin: 0 auto; }
+.quote blockquote { font-size: 18px; font-style: italic; color: #333; line-height: 1.7; border-left: 4px solid #3479E9; padding-left: 24px; text-align: left; }
+.quote cite { display: block; margin-top: 16px; font-size: 13px; color: #888; font-style: normal; }
+
+/* FAQ */
+.faq { padding: 72px 32px; max-width: 720px; margin: 0 auto; }
+.faq h2 { font-size: clamp(22px,3vw,30px); font-weight: 800; margin-bottom: 40px; text-align: center; }
+.faq-item { border-bottom: 1px solid #eee; padding: 24px 0; }
+.faq-item h4 { font-size: 16px; font-weight: 700; margin-bottom: 10px; color: #0d1117; }
+.faq-item p  { font-size: 14px; color: #555; line-height: 1.75; }
+
+/* CTA SECTION */
+.cta-section { background: #3479E9; padding: 72px 32px; text-align: center; color: #fff; }
+.cta-section h2 { font-size: clamp(24px,4vw,40px); font-weight: 800; margin-bottom: 16px; }
+.cta-section p { font-size: 16px; color: rgba(255,255,255,0.8); margin-bottom: 36px; }
+.cta-white { background: #fff; color: #3479E9; padding: 16px 36px; border-radius: 8px; text-decoration: none; font-size: 16px; font-weight: 700; display: inline-block; }
+.cta-note { font-size: 13px; color: rgba(255,255,255,0.65); margin-top: 14px; }
+
+/* FOOTER */
+footer { padding: 24px 32px; text-align: center; font-size: 13px; color: #bbb; border-top: 1px solid #f0f0f0; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="https://timeclock365.com" class="logo">TimeClock <span>365</span></a>
+  <a href="#cta" class="nav-cta">Book a Demo</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <h1>One Badge. One System.<br><span>No More Double Tracking.</span></h1>
+  <p>Most companies run door access and time tracking as two separate systems — two vendors, two bills, two sets of data that never match. TimeClock 365 replaces both.</p>
+  <a href="#cta" class="hero-cta">Book a 20-Minute Demo →</a>
+  <p class="hero-sub">No sales pitch. No deck. Just the product and your questions.</p>
+</section>
+
+<!-- LOGOS -->
+<div class="logos">
+  <p>Trusted by operations teams at</p>
+  <div class="logo-strip">
+    <span>Manufacturing</span>
+    <span>•</span>
+    <span>Engineering</span>
+    <span>•</span>
+    <span>Logistics</span>
+    <span>•</span>
+    <span>Construction</span>
+  </div>
+</div>
+
+<!-- PROBLEM STATS -->
+<section class="problem">
+  <h2>Two systems. One problem they both fail to solve.</h2>
+  <p>When door access and time tracking run separately, there's always a gap — employees who badge in but clock in late, or clock out correctly but the door log says otherwise. That gap is where payroll errors live.</p>
+  <div class="stat-row">
+    <div class="stat"><div class="stat-num">$373M</div><div class="stat-label">lost to buddy punching annually (US)</div></div>
+    <div class="stat"><div class="stat-num">4.5 hrs</div><div class="stat-label">avg. per employee per month in timesheet errors</div></div>
+    <div class="stat"><div class="stat-num">2×</div><div class="stat-label">the vendor cost when systems run separately</div></div>
+  </div>
+</section>
+
+<!-- BENEFITS -->
+<section class="benefits">
+  <h2>How it works</h2>
+  <h3>The door swipe is the time punch.</h3>
+  <div class="benefit-grid">
+    <div class="benefit-card">
+      <div class="benefit-icon">🚪</div>
+      <h4>One System Instead of Two</h4>
+      <p>When someone badges through the door, the time entry is created automatically — no app tap, no terminal, no second step. One action. One record. The IT overhead of maintaining two separate systems disappears.</p>
+    </div>
+    <div class="benefit-card">
+      <div class="benefit-icon">🛑</div>
+      <h4>100% Elimination of Buddy Punching</h4>
+      <p>PIN codes and apps can be shared. The door can't open for the wrong person. TimeClock 365 ties access control to individual identity — when the door opens, that person is physically present. That's the time record.</p>
+    </div>
+    <div class="benefit-card">
+      <div class="benefit-icon">📋</div>
+      <h4>Automatic Audit Trail</h4>
+      <p>Every door event is timestamped and cross-referenced with the time record. When a labor dispute or wage audit comes up, you have an immutable log — no reconstruction, no guesswork.</p>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how">
+  <h2>What changes on day one</h2>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <h4>Employee badges through the door</h4>
+        <p>Same badge, same reader — no new hardware required in most setups. TimeClock 365 integrates with the most common access control systems already installed.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <h4>Time entry created automatically</h4>
+        <p>The door event becomes the clock-in. No app. No terminal. No second action required from the employee. The record is accurate because it's tied to physical presence.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <h4>Payroll runs clean</h4>
+        <p>HR sees real hours, not self-reported ones. Exceptions are flagged automatically. Disputes drop because the data is objective — door was open or it wasn't.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SOCIAL PROOF -->
+<section class="proof">
+  <div class="quote">
+    <blockquote>
+      "We were running two separate systems and spending Friday afternoons reconciling the discrepancies. After switching to TimeClock 365, timesheet disputes dropped by over 80% in the first 90 days."
+    </blockquote>
+    <cite>— HR Director, 200-person manufacturing company</cite>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq">
+  <h2>Questions we get from HR and Operations teams</h2>
+  <div class="faq-item">
+    <h4>We already have a badge access system. Do we have to replace it?</h4>
+    <p>In most cases, no. TimeClock 365 integrates with the most common access control hardware at manufacturing and engineering facilities. We'll confirm compatibility with your specific setup during the demo — and if a hardware swap is needed, we'll be upfront about the cost before you commit to anything.</p>
+  </div>
+  <div class="faq-item">
+    <h4>What if an employee forgets their badge? Do they get locked out of the timeclock too?</h4>
+    <p>There's a manual override process — the employee can be let in by a manager, and the time entry is created manually with a notation. Every manual override is logged separately, so if badge-forgetting becomes a pattern for a specific employee, HR has data to back up that conversation.</p>
+  </div>
+  <div class="faq-item">
+    <h4>We have employees across multiple buildings and some outdoor crews. Does this work for us?</h4>
+    <p>Yes. TimeClock 365 supports multiple entry points across multiple buildings, with each door event assigned to a specific location. For outdoor or field crews, there's a GPS-based mobile option that runs in the same system — same database, same reports, same export format for payroll.</p>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="cta">
+  <h2>See it in 20 minutes.</h2>
+  <p>We'll show you exactly how the door swipe becomes a time record — live, in your browser, using a real setup similar to yours.</p>
+  <a href="https://timeclock365.com/demo" class="cta-white">Book a 20-Minute Demo →</a>
+  <p class="cta-note">No sales pitch. No commitment. Just the product and your questions.</p>
+</section>
+
+<footer>
+  © 2026 TimeClock 365 — Time Tracking + Door Access Control in One System
+</footer>
+
+</body>
+</html>
