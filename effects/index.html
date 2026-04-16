@@ -211,12 +211,20 @@ function s3Init() {
     s3arc[i]= 0.6 + Math.random() * 1.5;
     s3rad[i]= 6   + Math.random() * 24;
     s3wid[i]= 0.7 + Math.random() * 1.9;
-    // pre-compute color once — reuse every frame
-    const h = 18  + Math.random() * 34;
-    const s = 52  + Math.random() * 28;
-    const l = 42  + Math.random() * 22;
-    const a = (0.45 + Math.random() * 0.45).toFixed(2);
-    s3col.push(`hsla(${Math.floor(h)},${Math.floor(s)}%,${Math.floor(l)}%,${a})`);
+    // Stylish warm palette on light bg: espresso → sienna → amber → gold
+    const palette = [
+      [22,  42, 16],   // deep espresso
+      [20,  55, 28],   // dark sienna
+      [28,  50, 38],   // warm terracotta
+      [35,  45, 48],   // muted amber
+      [40,  38, 58],   // dusty gold
+      [18,  30, 22],   // near-black warm
+    ];
+    const [h, s, l] = palette[Math.floor(Math.random() * palette.length)];
+    const jh = h + (Math.random() - 0.5) * 8;
+    const jl = l + (Math.random() - 0.5) * 10;
+    const a  = (0.28 + Math.random() * 0.52).toFixed(2);
+    s3col.push(`hsla(${Math.floor(jh)},${s}%,${Math.floor(jl)}%,${a})`);
   }
 }
 
@@ -251,7 +259,7 @@ function s3Update() {
 }
 
 function s3Draw() {
-  ctx.fillStyle = '#16100a';
+  ctx.fillStyle = '#f5f0e8';
   ctx.fillRect(2*S, 0, S, H);
 
   ctx.save();
