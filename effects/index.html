@@ -96,10 +96,10 @@ function s1Draw() {
   ctx.fillStyle = '#0a0c12';
   ctx.fillRect(0, 0, S, H);
 
-  // Single fill pass — tiny dots, all same colour, fast
+  // Single fill pass — fixed 2×2 dots, never shrink
   ctx.fillStyle = 'rgba(200,215,255,0.72)';
   for (let i = 0; i < S1_N; i++) {
-    ctx.fillRect(s1x[i] | 0, s1y[i] | 0, 1, 1);
+    ctx.fillRect(s1x[i] | 0, s1y[i] | 0, 2, 2);
   }
 }
 
