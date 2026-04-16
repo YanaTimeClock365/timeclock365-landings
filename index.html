@@ -35,11 +35,11 @@
       x: width / 2,
       y: height / 2,
       active: false,
-      radius: 120
+      radius: 140
     };
 
     const particles = [];
-    const PARTICLE_COUNT = 220;
+    const PARTICLE_COUNT = 700;
 
     class Particle {
       constructor() {
@@ -53,12 +53,12 @@
         this.baseX = this.x;
         this.baseY = this.y;
 
-        this.vx = (Math.random() - 0.5) * 0.4;
-        this.vy = (Math.random() - 0.5) * 0.4;
+        this.vx = (Math.random() - 0.5) * 0.5;
+        this.vy = (Math.random() - 0.5) * 0.5;
 
-        this.size = Math.random() * 2 + 0.6;
-        this.alpha = Math.random() * 0.5 + 0.3;
-        this.density = Math.random() * 1.5 + 0.5;
+        this.size = Math.random() * 0.8 + 0.4;   // 0.4 – 1.2 px
+        this.alpha = Math.random() * 0.4 + 0.55;  // 0.55 – 0.95
+        this.density = Math.random() * 2 + 1.5;   // faster response
 
         if (!initial) {
           this.x = Math.random() * width;
@@ -81,8 +81,8 @@
           const force = (mouse.radius - distance) / mouse.radius;
           const angle = Math.atan2(dy, dx);
 
-          this.x += Math.cos(angle) * force * 4 * this.density;
-          this.y += Math.sin(angle) * force * 4 * this.density;
+          this.x += Math.cos(angle) * force * 10 * this.density;
+          this.y += Math.sin(angle) * force * 10 * this.density;
         } else {
           this.x += (this.baseX - this.x) * 0.03;
           this.y += (this.baseY - this.y) * 0.03;
