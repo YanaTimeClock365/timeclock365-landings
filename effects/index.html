@@ -248,11 +248,10 @@ function s3Update() {
         s3van[i]+= (Math.random() - 0.5) * t * 0.5;
       }
     }
-    s3vx[i] += (s3hx[i] - s3x[i]) * S3_SP;
-    s3vy[i] += (s3hy[i] - s3y[i]) * S3_SP;
+    // no spring — shavings stay where they land
     s3vx[i] *= S3_D; s3vy[i] *= S3_D;
     s3x[i]  += s3vx[i]; s3y[i]  += s3vy[i];
-    s3van[i]+= (s3han[i] - s3ang[i]) * 0.036;
+    s3van[i] *= S3_AD; // rotation also just slows down
     s3van[i]*= S3_AD;
     s3ang[i]+= s3van[i];
   }
