@@ -7,10 +7,47 @@
   <style>
     html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #f8f8f8; }
     canvas { display: block; width: 100vw; height: 100vh; }
+
+    .center {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    .btn-click {
+      pointer-events: all;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      color: #0d0d0d;
+      text-decoration: none;
+      padding: 22px 64px;
+      border: 2px solid #0d0d0d;
+      border-radius: 4px;
+      background: rgba(255,255,255,0.18);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      transition: background 0.25s, transform 0.2s, letter-spacing 0.2s;
+    }
+
+    .btn-click:hover {
+      background: rgba(255,255,255,0.45);
+      transform: scale(1.04);
+      letter-spacing: 9px;
+    }
   </style>
 </head>
 <body>
 <canvas id="canvas"></canvas>
+
+<div class="center">
+  <a href="effects/" class="btn-click">Click</a>
+</div>
 <script>
   const canvas = document.getElementById("canvas");
   const ctx    = canvas.getContext("2d");

@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Effects</title>
+<style>
+  html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #111; }
+  canvas { display: block; }
+
+  .back {
+    position: fixed;
+    top: 24px; left: 32px;
+    z-index: 20;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .back:hover { color: rgba(255,255,255,0.7); }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<a class="back" href="../">← Back</a>
+
+<script>
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
+
+let W, H, S; // S = one section width
+
+// ── Mouse ────────────────────────────────────────────────────────────────────
+let mx = -9999, my = -9999, mActive = false;
+
+window.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY; mActive = true;
+});
+window.addEventListener('mouseleave', () => { mActive = false; });
+window.addEventListener('touchmove', e => {
+  e.preventDefault();
+  mx = e.touches[0].clientX; my = e.touches[0].clientY; mActive = true;
+}, { passive: false });
+window.addEventListener('touchend', () => { mActive = false; });
+
+// ════════════════════════════════════════════════════════════════════════════
+// 1. OIL  (left third)
+// ════════════════════════════════════════════════════════════════════════════
+const OIL_N = 480;
+const ox  = new Float32Array(OIL_N), oy  = new Float32Array(OIL_N);
+const ovx = new Float32Array(OIL_N), ovy = new Float32Array(OIL_N);
+const ohx = new Float32Array(OIL_N), ohy = new Float32Array(OIL_N);
+const or_  = new Float32Array(OIL_N);
+
+const OIL_R  = 75,  OIL_R2 = OIL_R * OIL_R;
+const OIL_F  = 1.8;          // weak push  — oil is heavy
+const OIL_SP = 0.0035;       // very slow spring
+const OIL_D  = 0.968;        // high damp  — viscous
+
+function oilInit() {
+  for (let i = 0; i < OIL_N; i++) {
+    ox[i] = ohx[i] = Math.random() * S;
+    oy[i] = ohy[i] = Math.random() * H;
+    ovx[i] = ovy[i] = 0;
+    or_[i] = 7 + Math.random() * 11; // big blobs 7–18 px
+  }
+}
+
+function oilUpdate() {
+  const hit = mActive && mx < S;
+  for (let i = 0; i < OIL_N; i++) {
+    if (hit) {
+      const dx = ox[i] - mx, dy = oy[i] - my;
+      const d2 = dx*dx + dy*dy;
+      if (d2 < OIL_R2 && d2 > 0.5) {
+        const d = Math.sqrt(d2);
+        const t = 1 - d / OIL_R;
+        const f = t * t * OIL_F;
+        ovx[i] += dx/d * f;
+        ovy[i] += dy/d * f;
+      }
+    }
+    ovx[i] += (ohx[i] - ox[i]) * OIL_SP;
+    ovy[i] += (ohy[i] - oy[i]) * OIL_SP;
+    ovx[i] *= OIL_D; ovy[i] *= OIL_D;
+    ox[i]  += ovx[i]; oy[i]  += ovy[i];
+  }
+}
+
+function oilDraw() {
+  // Background: deep amber gradient
+  const bg = ctx.createLinearGradient(0, 0, S, H);
+  bg.addColorStop(0, '#B06808');
+  bg.addColorStop(1, '#8C4E04');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, S, H);
+
+  // Blobs: large soft golden circles
+  for (let i = 0; i < OIL_N; i++) {
+    const spd = Math.hypot(ovx[i], ovy[i]);
+    const g   = Math.min(spd * 0.35, 1);
+    const r   = or_[i] * (1 + g * 0.5);
+
+    const grd = ctx.createRadialGradient(ox[i], oy[i], 0, ox[i], oy[i], r);
+    grd.addColorStop(0,   `rgba(255,215,55,${0.50 + g * 0.2})`);
+    grd.addColorStop(0.6, `rgba(230,160,15,0.22)`);
+    grd.addColorStop(1,   `rgba(200,120,5,0)`);
+    ctx.fillStyle = grd;
+    ctx.beginPath();
+    ctx.arc(ox[i], oy[i], r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Surface sheen
+  const sh = ctx.createLinearGradient(0, 0, S * 0.6, H * 0.4);
+  sh.addColorStop(0,   'rgba(255,240,140,0.10)');
+  sh.addColorStop(1,   'rgba(255,200,50,0)');
+  ctx.fillStyle = sh;
+  ctx.fillRect(0, 0, S, H);
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// 2. WATER  (middle third) — height-map ripple
+// ════════════════════════════════════════════════════════════════════════════
+const WRES = 3;           // px per cell
+let WCols, WRows;
+let wBuf = null, wPrev = null;
+const WDAMP = 0.986;
+
+function waterInit() {
+  WCols = Math.floor(S / WRES);
+  WRows = Math.floor(H / WRES);
+  wBuf  = new Float32Array(WCols * WRows);
+  wPrev = new Float32Array(WCols * WRows);
+}
+
+function waterUpdate() {
+  if (mActive && mx >= S && mx < 2*S) {
+    const gx = Math.floor((mx - S) / WRES);
+    const gy = Math.floor(my / WRES);
+    const R  = 5;
+    for (let dy = -R; dy <= R; dy++) {
+      for (let dx = -R; dx <= R; dx++) {
+        const nx = gx+dx, ny = gy+dy;
+        if (nx>=0 && nx<WCols && ny>=0 && ny<WRows) {
+          const d = Math.sqrt(dx*dx+dy*dy);
+          if (d <= R) wBuf[ny*WCols+nx] += (1-d/R)*90;
+        }
+      }
+    }
+  }
+
+  const nxt = wPrev;
+  for (let y = 1; y < WRows-1; y++) {
+    for (let x = 1; x < WCols-1; x++) {
+      const i = y*WCols + x;
+      nxt[i] = (wBuf[i-1] + wBuf[i+1] + wBuf[i-WCols] + wBuf[i+WCols]) * 0.5 - nxt[i];
+      nxt[i] *= WDAMP;
+    }
+  }
+  // swap
+  wPrev = wBuf;
+  wBuf  = nxt;
+}
+
+function waterDraw() {
+  // Background
+  ctx.fillStyle = '#091E38';
+  ctx.fillRect(S, 0, S, H);
+
+  // Ripple cells
+  const MX = 65;
+  for (let y = 0; y < WRows; y++) {
+    for (let x = 0; x < WCols; x++) {
+      const h = wBuf[y*WCols + x];
+      if (Math.abs(h) < 0.8) continue;
+      const t  = Math.max(-1, Math.min(1, h / MX));
+      const li = t > 0 ? t : 0;
+      const dk = t < 0 ? -t : 0;
+      const r  = Math.floor(15  + li*100 - dk*8);
+      const g  = Math.floor(60  + li*140 - dk*20);
+      const b  = Math.floor(110 + li*145 - dk*35);
+      const a  = Math.min(0.85, Math.abs(t) * 1.8);
+      ctx.fillStyle = `rgba(${r},${g},${b},${a})`;
+      ctx.fillRect(S + x*WRES, y*WRES, WRES, WRES);
+    }
+  }
+
+  // Soft overlay shimmer
+  const sh = ctx.createLinearGradient(S, 0, 2*S, H);
+  sh.addColorStop(0,   'rgba(80,150,220,0.05)');
+  sh.addColorStop(0.5, 'rgba(120,190,255,0.09)');
+  sh.addColorStop(1,   'rgba(50,130,200,0.04)');
+  ctx.fillStyle = sh;
+  ctx.fillRect(S, 0, S, H);
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// 3. WOOD  (right third) — grain background + flying splinters
+// ════════════════════════════════════════════════════════════════════════════
+const WD_N = 380;
+const wx   = new Float32Array(WD_N), wy   = new Float32Array(WD_N);
+const wvx  = new Float32Array(WD_N), wvy  = new Float32Array(WD_N);
+const whx  = new Float32Array(WD_N), why  = new Float32Array(WD_N);
+const wang = new Float32Array(WD_N), whan = new Float32Array(WD_N);
+const wvan = new Float32Array(WD_N);
+const wlen = new Float32Array(WD_N), wwid = new Float32Array(WD_N);
+const wclr = new Uint8Array(WD_N);  // shade value 0-255
+
+const WD_R  = 85,  WD_R2 = WD_R * WD_R;
+const WD_F  = 11;
+const WD_SP = 0.032;
+const WD_D  = 0.875;
+const WD_AD = 0.88;
+
+let grainCanvas = null;
+
+function buildGrain() {
+  grainCanvas = document.createElement('canvas');
+  grainCanvas.width  = S;
+  grainCanvas.height = H;
+  const gc = grainCanvas.getContext('2d');
+
+  // Base warm wood tone
+  gc.fillStyle = '#7A4A22';
+  gc.fillRect(0, 0, S, H);
+
+  // Horizontal grain bands
+  let y = 0;
+  while (y < H) {
+    const step   = 1.5 + Math.random() * 7;
+    const lum    = 60 + Math.random() * 50;
+    const alpha  = 0.12 + Math.random() * 0.28;
+    gc.beginPath();
+    gc.moveTo(0, y);
+    let cx = 0;
+    while (cx < S) {
+      const nx = cx + 15 + Math.random() * 35;
+      gc.lineTo(nx, y + (Math.random() - 0.5) * 5);
+      cx = nx;
+    }
+    gc.strokeStyle = `rgba(${lum+40},${lum},${lum-25},${alpha})`;
+    gc.lineWidth = 0.4 + Math.random() * 1.6;
+    gc.stroke();
+    y += step;
+  }
+
+  // 2–4 knots
+  const kn = 2 + Math.floor(Math.random() * 3);
+  for (let k = 0; k < kn; k++) {
+    const kx = 20 + Math.random() * (S-40);
+    const ky = 20 + Math.random() * (H-40);
+    for (let r = 28; r > 1; r -= 3 + Math.random()*4) {
+      gc.beginPath();
+      gc.ellipse(kx, ky, r, r*0.38, 0.1, 0, Math.PI*2);
+      gc.strokeStyle = `rgba(40,20,5,${0.05 + Math.random()*0.1})`;
+      gc.lineWidth = 0.7;
+      gc.stroke();
+    }
+  }
+
+  // Subtle vignette
+  const vg = gc.createRadialGradient(S/2, H/2, H*0.2, S/2, H/2, H*0.8);
+  vg.addColorStop(0, 'rgba(0,0,0,0)');
+  vg.addColorStop(1, 'rgba(0,0,0,0.18)');
+  gc.fillStyle = vg;
+  gc.fillRect(0, 0, S, H);
+}
+
+function woodInit() {
+  buildGrain();
+  for (let i = 0; i < WD_N; i++) {
+    wx[i]  = whx[i] = 2*S + Math.random() * S;
+    wy[i]  = why[i] = Math.random() * H;
+    wvx[i] = wvy[i] = wvan[i] = 0;
+    wang[i]= whan[i]= Math.random() * Math.PI;
+    wlen[i]= 9  + Math.random() * 18;
+    wwid[i]= 1  + Math.random() * 2;
+    wclr[i]= 55 + Math.floor(Math.random() * 55); // brown shade
+  }
+}
+
+function woodUpdate() {
+  const hit = mActive && mx >= 2*S;
+  for (let i = 0; i < WD_N; i++) {
+    if (hit) {
+      const dx = wx[i] - mx, dy = wy[i] - my;
+      const d2 = dx*dx + dy*dy;
+      if (d2 < WD_R2 && d2 > 0.5) {
+        const d  = Math.sqrt(d2);
+        const t  = 1 - d / WD_R;
+        const f  = t * t * WD_F;
+        wvx[i]  += dx/d * f;
+        wvy[i]  += dy/d * f;
+        wvan[i] += (Math.random()-0.5) * t * 0.35;
+      }
+    }
+    wvx[i]  += (whx[i] - wx[i]) * WD_SP;
+    wvy[i]  += (why[i] - wy[i]) * WD_SP;
+    wvx[i]  *= WD_D;  wvy[i]  *= WD_D;
+    wx[i]   += wvx[i]; wy[i]  += wvy[i];
+    wvan[i] += (whan[i] - wang[i]) * 0.045;
+    wvan[i] *= WD_AD;
+    wang[i] += wvan[i];
+  }
+}
+
+function woodDraw() {
+  ctx.drawImage(grainCanvas, 2*S, 0);
+
+  for (let i = 0; i < WD_N; i++) {
+    ctx.save();
+    ctx.translate(wx[i], wy[i]);
+    ctx.rotate(wang[i]);
+    const spd   = Math.hypot(wvx[i], wvy[i]);
+    const alpha = Math.min(0.55 + spd * 0.06, 0.95);
+    const c     = wclr[i];
+    ctx.fillStyle = `rgba(${c+35},${c},${c-20},${alpha})`;
+    ctx.fillRect(-wlen[i]/2, -wwid[i]/2, wlen[i], wwid[i]);
+    ctx.restore();
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// DIVIDERS + LABELS
+// ════════════════════════════════════════════════════════════════════════════
+function drawUI() {
+  // Dividers
+  ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([5, 9]);
+  ctx.beginPath(); ctx.moveTo(S, 0);   ctx.lineTo(S, H);   ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(2*S, 0); ctx.lineTo(2*S, H); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Labels
+  ctx.textAlign    = 'center';
+  ctx.textBaseline = 'top';
+  ctx.font         = '700 10px -apple-system,BlinkMacSystemFont,sans-serif';
+
+  ctx.fillStyle = 'rgba(255,210,70,0.40)';
+  ctx.fillText('OIL', S/2, 24);
+
+  ctx.fillStyle = 'rgba(110,195,255,0.40)';
+  ctx.fillText('WATER', S + S/2, 24);
+
+  ctx.fillStyle = 'rgba(220,165,90,0.40)';
+  ctx.fillText('WOOD', 2*S + S/2, 24);
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// INIT + LOOP
+// ════════════════════════════════════════════════════════════════════════════
+function init() {
+  W = canvas.width  = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+  S = W / 3;
+  oilInit();
+  waterInit();
+  woodInit();
+}
+
+function loop() {
+  requestAnimationFrame(loop);
+  oilUpdate();
+  waterUpdate();
+  woodUpdate();
+  oilDraw();
+  waterDraw();
+  woodDraw();
+  drawUI();
+}
+
+window.addEventListener('resize', init);
+init();
+loop();
+</script>
+</body>
+</html>
