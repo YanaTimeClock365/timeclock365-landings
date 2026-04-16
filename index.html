@@ -3,134 +3,112 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Particles Mouse Effect</title>
+  <title>Particles</title>
   <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background: #f8f8f8;
-    }
-
-    canvas {
-      display: block;
-      width: 100vw;
-      height: 100vh;
-    }
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #f8f8f8; }
+    canvas { display: block; width: 100vw; height: 100vh; }
   </style>
 </head>
 <body>
-  <canvas id="canvas"></canvas>
+<canvas id="canvas"></canvas>
+<script>
+  const canvas = document.getElementById("canvas");
+  const ctx    = canvas.getContext("2d");
 
-  <script>
-    const canvas = document.getElementById("canvas");
-    const ctx = canvas.getContext("2d");
+  let W = canvas.width  = window.innerWidth;
+  let H = canvas.height = window.innerHeight;
 
-    let width = canvas.width = window.innerWidth;
-    let height = canvas.height = window.innerHeight;
+  // ── Typed arrays for maximum performance ──────────────────────────────────
+  // Avoids JS object overhead — tight loops over flat memory = much faster
+  const N  = 12000;
 
-    const mouse = {
-      x: width / 2,
-      y: height / 2,
-      active: false,
-      radius: 140
-    };
+  const px  = new Float32Array(N);   // current x
+  const py  = new Float32Array(N);   // current y
+  const pvx = new Float32Array(N);   // velocity x
+  const pvy = new Float32Array(N);   // velocity y
+  const pbx = new Float32Array(N);   // base / home x  (random drift target)
+  const pby = new Float32Array(N);   // base / home y
+  const pdx = new Float32Array(N);   // drift velocity x
+  const pdy = new Float32Array(N);   // drift velocity y
+  const psz = new Float32Array(N);   // size  0.5 – 1.5 px
+  const pal = new Float32Array(N);   // alpha 0.55 – 0.95
+  const pdn = new Float32Array(N);   // density / speed multiplier
 
-    const particles = [];
-    const PARTICLE_COUNT = 5000;
+  function init() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
 
-    class Particle {
-      constructor() {
-        this.reset(true);
-      }
-
-      reset(initial = false) {
-        this.x = Math.random() * width;
-        this.y = Math.random() * height;
-
-        this.baseX = this.x;
-        this.baseY = this.y;
-
-        this.vx = (Math.random() - 0.5) * 0.5;
-        this.vy = (Math.random() - 0.5) * 0.5;
-
-        this.size = Math.random() * 0.8 + 0.4;   // 0.4 – 1.2 px
-        this.alpha = Math.random() * 0.4 + 0.55;  // 0.55 – 0.95
-        this.density = Math.random() * 2 + 1.5;   // faster response
-
-        if (!initial) {
-          this.x = Math.random() * width;
-          this.y = Math.random() * height;
-        }
-      }
-
-      update() {
-        this.baseX += this.vx;
-        this.baseY += this.vy;
-
-        if (this.baseX < 0 || this.baseX > width) this.vx *= -1;
-        if (this.baseY < 0 || this.baseY > height) this.vy *= -1;
-
-        let dx = mouse.x - this.x;
-        let dy = mouse.y - this.y;
-        let distance = Math.sqrt(dx * dx + dy * dy);
-
-        if (mouse.active && distance < mouse.radius) {
-          const force = (mouse.radius - distance) / mouse.radius;
-          const angle = Math.atan2(dy, dx);
-
-          this.x += Math.cos(angle) * force * 10 * this.density;
-          this.y += Math.sin(angle) * force * 10 * this.density;
-        } else {
-          this.x += (this.baseX - this.x) * 0.03;
-          this.y += (this.baseY - this.y) * 0.03;
-        }
-      }
-
-      draw() {
-        ctx.fillStyle = `rgba(0,0,0,${this.alpha})`;
-        ctx.fillRect(this.x, this.y, this.size, this.size);
-      }
+    for (let i = 0; i < N; i++) {
+      px[i]  = pbx[i] = Math.random() * W;
+      py[i]  = pby[i] = Math.random() * H;
+      pvx[i] = 0;
+      pvy[i] = 0;
+      pdx[i] = (Math.random() - 0.5) * 0.5;
+      pdy[i] = (Math.random() - 0.5) * 0.5;
+      psz[i] = Math.random() * 1.0 + 0.5;
+      pal[i] = Math.random() * 0.4 + 0.55;
+      pdn[i] = Math.random() * 2 + 1;
     }
+  }
 
-    function init() {
-      particles.length = 0;
-      for (let i = 0; i < PARTICLE_COUNT; i++) {
-        particles.push(new Particle());
+  // ── Mouse ─────────────────────────────────────────────────────────────────
+  let mx = -9999, my = -9999, mActive = false;
+
+  window.addEventListener("mousemove", e => { mx = e.clientX; my = e.clientY; mActive = true; });
+  window.addEventListener("mouseleave", () => { mActive = false; });
+  window.addEventListener("touchmove", e => {
+    e.preventDefault();
+    mx = e.touches[0].clientX; my = e.touches[0].clientY; mActive = true;
+  }, { passive: false });
+  window.addEventListener("touchend", () => { mActive = false; });
+  window.addEventListener("resize", init);
+
+  // ── Main loop ─────────────────────────────────────────────────────────────
+  function animate() {
+    requestAnimationFrame(animate);
+    ctx.clearRect(0, 0, W, H);
+
+    // single fillStyle for all dots — no per-particle style switch = fast
+    ctx.fillStyle = "rgba(0,0,0,0.75)";
+
+    for (let i = 0; i < N; i++) {
+      // 1. Drift — base position wanders slowly
+      pbx[i] += pdx[i];
+      pby[i] += pdy[i];
+      if (pbx[i] < 0 || pbx[i] > W) pdx[i] *= -1;
+      if (pby[i] < 0 || pby[i] > H) pdy[i] *= -1;
+
+      // 2. Attraction — ALL particles pulled toward mouse, no radius cutoff
+      if (mActive) {
+        const dx   = mx - px[i];
+        const dy   = my - py[i];
+        const dist = Math.sqrt(dx * dx + dy * dy) + 1;
+
+        // force = strong up close, still present far away
+        const force = (300 / (dist + 30)) * pdn[i];
+        pvx[i] += (dx / dist) * force;
+        pvy[i] += (dy / dist) * force;
       }
+
+      // 3. Return to drifting base when far from collected point
+      pvx[i] += (pbx[i] - px[i]) * 0.015;
+      pvy[i] += (pby[i] - py[i]) * 0.015;
+
+      // 4. Damping
+      pvx[i] *= 0.88;
+      pvy[i] *= 0.88;
+
+      // 5. Move
+      px[i] += pvx[i];
+      py[i] += pvy[i];
+
+      // 6. Draw — fillRect is ~4× faster than arc for small dots
+      ctx.fillRect(px[i], py[i], psz[i], psz[i]);
     }
+  }
 
-    function animate() {
-      ctx.clearRect(0, 0, width, height);
-
-      for (const particle of particles) {
-        particle.update();
-        particle.draw();
-      }
-
-      requestAnimationFrame(animate);
-    }
-
-    window.addEventListener("mousemove", (e) => {
-      mouse.x = e.clientX;
-      mouse.y = e.clientY;
-      mouse.active = true;
-    });
-
-    window.addEventListener("mouseleave", () => {
-      mouse.active = false;
-    });
-
-    window.addEventListener("resize", () => {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
-      init();
-    });
-
-    init();
-    animate();
-  </script>
+  init();
+  animate();
+</script>
 </body>
 </html>
