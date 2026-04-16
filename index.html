@@ -1,259 +1,138 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Particle Field</title>
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    background: #f7f7f5;
-    overflow: hidden;
-    width: 100vw;
-    height: 100vh;
-    cursor: none;
-  }
-  canvas { display: block; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Particles Mouse Effect</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #f8f8f8;
+    }
+
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+    }
+  </style>
 </head>
 <body>
-<canvas id="c"></canvas>
+  <canvas id="canvas"></canvas>
 
-<script>
-// ─── CANVAS SETUP ────────────────────────────────────────────────────────────
-const canvas = document.getElementById('c');
-const ctx    = canvas.getContext('2d');
+  <script>
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
 
-let W, H;
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
 
-function resize() {
-  W = canvas.width  = window.innerWidth;
-  H = canvas.height = window.innerHeight;
-}
-resize();
-window.addEventListener('resize', () => { resize(); spawnAll(); });
+    const mouse = {
+      x: width / 2,
+      y: height / 2,
+      active: false,
+      radius: 120
+    };
 
-// ─── MOUSE STATE ─────────────────────────────────────────────────────────────
-const mouse = {
-  x: -9999, y: -9999,   // real cursor
-  sx: -9999, sy: -9999, // smoothed cursor (lags behind)
-  vx: 0, vy: 0,         // cursor velocity
-  active: false,
-  idleTimer: 0,
-};
+    const particles = [];
+    const PARTICLE_COUNT = 220;
 
-window.addEventListener('mousemove', e => {
-  mouse.x = e.clientX;
-  mouse.y = e.clientY;
-  mouse.active = true;
-  mouse.idleTimer = 0;
-});
-window.addEventListener('mouseleave', () => { mouse.active = false; });
-window.addEventListener('touchmove', e => {
-  e.preventDefault();
-  mouse.x = e.touches[0].clientX;
-  mouse.y = e.touches[0].clientY;
-  mouse.active = true;
-  mouse.idleTimer = 0;
-}, { passive: false });
-window.addEventListener('touchend', () => { mouse.active = false; });
-
-// ─── CONFIG ───────────────────────────────────────────────────────────────────
-const CFG = {
-  count:        380,   // total particles
-  attractR:     160,   // attraction zone radius
-  attractF:     0.09,  // attraction force
-  repelR:       35,    // keep-away zone around cursor
-  repelF:       0.25,  // repel force
-  drift:        0.018, // random drift strength
-  damp:         0.91,  // velocity damping (1 = no friction)
-  maxSpeed:     3.8,
-  idleDelay:    90,    // frames before "scatter" kicks in when idle
-};
-
-// ─── PARTICLE CLASS ───────────────────────────────────────────────────────────
-class Particle {
-  constructor() {
-    // layer: 0 = background (slow, small, faint)
-    //        1 = foreground (fast, bigger, darker)
-    this.layer = Math.random();
-    this.init();
-    // start already spread across canvas
-    this.x = Math.random() * W;
-    this.y = Math.random() * H;
-  }
-
-  init() {
-    this.x  = Math.random() * W;
-    this.y  = Math.random() * H;
-    this.vx = (Math.random() - 0.5) * 0.4;
-    this.vy = (Math.random() - 0.5) * 0.4;
-
-    // depth-based visual properties
-    const l = this.layer;
-    this.r        = 0.5 + l * 1.6;           // radius 0.5..2.1 px
-    this.alpha    = 0.08 + l * 0.52;         // opacity 0.08..0.6
-    this.speedMul = 0.25 + l * 0.75;         // speed scale 0.25..1
-    this.color    = Math.round(20 + (1 - l) * 60); // dark 20..80
-
-    // drift: slow random walk
-    this.dAngle = Math.random() * Math.PI * 2;
-    this.dSpeed = 0.08 + Math.random() * 0.18;
-  }
-
-  update(idleFactor) {
-    // 1. Drift — gentle random walk
-    this.dAngle += (Math.random() - 0.5) * 0.06;
-    const driftScale = (CFG.drift + idleFactor * 0.025) * this.speedMul;
-    this.vx += Math.cos(this.dAngle) * this.dSpeed * driftScale;
-    this.vy += Math.sin(this.dAngle) * this.dSpeed * driftScale;
-
-    // 2. Magnetic attraction / repulsion
-    if (mouse.active) {
-      const dx   = mouse.sx - this.x;
-      const dy   = mouse.sy - this.y;
-      const dist = Math.hypot(dx, dy) || 0.001;
-
-      if (dist < CFG.attractR) {
-        // Attraction — weaker for background layers (depth effect)
-        const t = 1 - dist / CFG.attractR;
-        const f = t * t * CFG.attractF * this.speedMul * (1 - idleFactor * 0.6);
-        this.vx += (dx / dist) * f;
-        this.vy += (dy / dist) * f;
+    class Particle {
+      constructor() {
+        this.reset(true);
       }
 
-      if (dist < CFG.repelR) {
-        // Repel from cursor centre
-        const t = 1 - dist / CFG.repelR;
-        const f = t * CFG.repelF * this.speedMul;
-        this.vx -= (dx / dist) * f;
-        this.vy -= (dy / dist) * f;
+      reset(initial = false) {
+        this.x = Math.random() * width;
+        this.y = Math.random() * height;
+
+        this.baseX = this.x;
+        this.baseY = this.y;
+
+        this.vx = (Math.random() - 0.5) * 0.4;
+        this.vy = (Math.random() - 0.5) * 0.4;
+
+        this.size = Math.random() * 2 + 0.6;
+        this.alpha = Math.random() * 0.5 + 0.3;
+        this.density = Math.random() * 1.5 + 0.5;
+
+        if (!initial) {
+          this.x = Math.random() * width;
+          this.y = Math.random() * height;
+        }
+      }
+
+      update() {
+        this.baseX += this.vx;
+        this.baseY += this.vy;
+
+        if (this.baseX < 0 || this.baseX > width) this.vx *= -1;
+        if (this.baseY < 0 || this.baseY > height) this.vy *= -1;
+
+        let dx = mouse.x - this.x;
+        let dy = mouse.y - this.y;
+        let distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (mouse.active && distance < mouse.radius) {
+          const force = (mouse.radius - distance) / mouse.radius;
+          const angle = Math.atan2(dy, dx);
+
+          this.x += Math.cos(angle) * force * 4 * this.density;
+          this.y += Math.sin(angle) * force * 4 * this.density;
+        } else {
+          this.x += (this.baseX - this.x) * 0.03;
+          this.y += (this.baseY - this.y) * 0.03;
+        }
+      }
+
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(0,0,0,${this.alpha})`;
+        ctx.fill();
       }
     }
 
-    // 3. Damping
-    this.vx *= CFG.damp;
-    this.vy *= CFG.damp;
-
-    // 4. Speed cap
-    const spd = Math.hypot(this.vx, this.vy);
-    const cap = CFG.maxSpeed * this.speedMul;
-    if (spd > cap) {
-      this.vx = (this.vx / spd) * cap;
-      this.vy = (this.vy / spd) * cap;
+    function init() {
+      particles.length = 0;
+      for (let i = 0; i < PARTICLE_COUNT; i++) {
+        particles.push(new Particle());
+      }
     }
 
-    // 5. Move
-    this.x += this.vx;
-    this.y += this.vy;
+    function animate() {
+      ctx.clearRect(0, 0, width, height);
 
-    // 6. Wrap edges
-    if (this.x < -4) this.x = W + 4;
-    else if (this.x > W + 4) this.x = -4;
-    if (this.y < -4) this.y = H + 4;
-    else if (this.y > H + 4) this.y = -4;
-  }
+      for (const particle of particles) {
+        particle.update();
+        particle.draw();
+      }
 
-  draw() {
-    const spd    = Math.hypot(this.vx, this.vy);
-    const moving = Math.min(spd / (CFG.maxSpeed * this.speedMul), 1);
-
-    // Soft glow halo when particle is in motion
-    if (moving > 0.15) {
-      const glowR = this.r * (3 + moving * 4);
-      const grad  = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, glowR);
-      const c     = this.color;
-      grad.addColorStop(0, `rgba(${c},${c},${c},${this.alpha * moving * 0.25})`);
-      grad.addColorStop(1, `rgba(${c},${c},${c},0)`);
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, glowR, 0, Math.PI * 2);
-      ctx.fillStyle = grad;
-      ctx.fill();
+      requestAnimationFrame(animate);
     }
 
-    // Core dot
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(${this.color},${this.color},${this.color},${this.alpha})`;
-    ctx.fill();
-  }
-}
+    window.addEventListener("mousemove", (e) => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+      mouse.active = true;
+    });
 
-// ─── MAGNETIC FIELD RINGS ─────────────────────────────────────────────────────
-function drawField(idleFactor) {
-  if (!mouse.active || idleFactor > 0.85) return;
+    window.addEventListener("mouseleave", () => {
+      mouse.active = false;
+    });
 
-  const fade = 1 - idleFactor;
+    window.addEventListener("resize", () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+      init();
+    });
 
-  // Concentric rings — show magnetic influence zone
-  for (let i = 1; i <= 4; i++) {
-    const ratio = i / 4;
-    const r     = CFG.attractR * ratio;
-    const a     = (1 - ratio) * 0.055 * fade;
-    ctx.beginPath();
-    ctx.arc(mouse.sx, mouse.sy, r, 0, Math.PI * 2);
-    ctx.strokeStyle = `rgba(0,0,0,${a})`;
-    ctx.lineWidth   = 0.6;
-    ctx.stroke();
-  }
-
-  // Cursor dot
-  const cA = 0.45 * fade;
-  ctx.beginPath();
-  ctx.arc(mouse.sx, mouse.sy, 3, 0, Math.PI * 2);
-  ctx.fillStyle = `rgba(0,0,0,${cA})`;
-  ctx.fill();
-
-  // Cursor ring
-  ctx.beginPath();
-  ctx.arc(mouse.sx, mouse.sy, 10, 0, Math.PI * 2);
-  ctx.strokeStyle = `rgba(0,0,0,${cA * 0.5})`;
-  ctx.lineWidth   = 0.8;
-  ctx.stroke();
-}
-
-// ─── PARTICLES ARRAY ──────────────────────────────────────────────────────────
-let particles = [];
-
-function spawnAll() {
-  particles = Array.from({ length: CFG.count }, () => new Particle());
-}
-spawnAll();
-
-// ─── MAIN LOOP ────────────────────────────────────────────────────────────────
-function loop() {
-  requestAnimationFrame(loop);
-
-  // Clear with very slight trail (motion blur feel)
-  ctx.fillStyle = 'rgba(247, 247, 245, 0.55)';
-  ctx.fillRect(0, 0, W, H);
-
-  // Smooth mouse lag — cursor position lags ~6 frames behind real position
-  const lag = 0.14;
-  mouse.sx += (mouse.x - mouse.sx) * lag;
-  mouse.sy += (mouse.y - mouse.sy) * lag;
-
-  // Track idle: how long since last mouse move
-  if (mouse.active) mouse.idleTimer = Math.min(mouse.idleTimer + 1, CFG.idleDelay * 2);
-  else              mouse.idleTimer = Math.max(mouse.idleTimer - 2, 0);
-
-  // idleFactor 0 = cursor just moved   1 = been idle a while
-  // Used to gradually scatter particles when cursor stops
-  const idleFactor = Math.max(0, (mouse.idleTimer - CFG.idleDelay) / CFG.idleDelay);
-
-  // Draw field rings first (below particles)
-  drawField(idleFactor);
-
-  // Sort by layer so background particles render first
-  // (pre-sorted at spawn; skip per-frame sort for perf)
-
-  for (const p of particles) {
-    p.update(idleFactor);
-    p.draw();
-  }
-}
-
-loop();
-</script>
+    init();
+    animate();
+  </script>
 </body>
 </html>
