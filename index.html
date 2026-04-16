@@ -18,14 +18,13 @@
   let W = canvas.width  = window.innerWidth;
   let H = canvas.height = window.innerHeight;
 
-  // ── Typed arrays — плотная память, быстрый loop ───────────────────────────
   const N   = 30000;
-  const px  = new Float32Array(N);
-  const py  = new Float32Array(N);
-  const pvx = new Float32Array(N);
-  const pvy = new Float32Array(N);
-  const phx = new Float32Array(N);  // home x (куда возвращаться)
-  const phy = new Float32Array(N);  // home y
+  const px  = new Float32Array(N);   // текущая x
+  const py  = new Float32Array(N);   // текущая y
+  const pvx = new Float32Array(N);   // скорость x
+  const pvy = new Float32Array(N);   // скорость y
+  const phx = new Float32Array(N);   // домашняя x (куда вернуться)
+  const phy = new Float32Array(N);   // домашняя y
 
   // Мышь
   let mx = -9999, my = -9999, mActive = false;
@@ -37,61 +36,72 @@
     mx = e.touches[0].clientX; my = e.touches[0].clientY; mActive = true;
   }, { passive: false });
   window.addEventListener("touchend", () => { mActive = false; });
-
-  function init() {
+  window.addEventListener("resize", () => {
     W = canvas.width  = window.innerWidth;
     H = canvas.height = window.innerHeight;
+    init();
+  });
+
+  function init() {
     for (let i = 0; i < N; i++) {
-      px[i] = phx[i] = Math.random() * W;
-      py[i] = phy[i] = Math.random() * H;
+      phx[i] = Math.random() * W;
+      phy[i] = Math.random() * H;
+      px[i]  = phx[i];
+      py[i]  = phy[i];
       pvx[i] = 0;
       pvy[i] = 0;
     }
   }
 
-  window.addEventListener("resize", init);
-
-  // ── Параметры ──────────────────────────────────────────────────────────────
-  const REPEL_R  = 90;    // радиус отталкивания мышки
+  // ── Физика ──────────────────────────────────────────────────────────────────
+  const REPEL_R  = 90;
   const REPEL_R2 = REPEL_R * REPEL_R;
-  const REPEL_F  = 8;     // сила отталкивания
-  const SPRING   = 0.035; // скорость возврата на место
-  const DAMP     = 0.87;  // затухание скорости
+  const REPEL_F  = 5;     // сила отталкивания — не слишком сильная
+  const SPRING   = 0.018; // слабая пружина — нет перелёта
+  const DAMP     = 0.96;  // высокое затухание — нет осцилляции
+  const MAX_V    = 10;    // ограничение скорости
 
-  // ── Loop ───────────────────────────────────────────────────────────────────
   function animate() {
     requestAnimationFrame(animate);
     ctx.clearRect(0, 0, W, H);
-    ctx.fillStyle = "#111";
+    ctx.fillStyle = "rgba(20,20,20,0.85)";
 
     for (let i = 0; i < N; i++) {
-      // 1. Возврат на домашнюю позицию (spring)
-      pvx[i] += (phx[i] - px[i]) * SPRING;
-      pvy[i] += (phy[i] - py[i]) * SPRING;
-
-      // 2. Отталкивание от мышки
+      // 1. Мышка отталкивает
       if (mActive) {
-        const dx  = px[i] - mx;
-        const dy  = py[i] - my;
-        const d2  = dx * dx + dy * dy;
-        if (d2 < REPEL_R2 && d2 > 0.01) {
-          const d    = Math.sqrt(d2);
-          const t    = 1 - d / REPEL_R;          // 0..1, сильнее у центра
-          const f    = t * t * REPEL_F / d;
-          pvx[i]    += dx * f;
-          pvy[i]    += dy * f;
+        const dx = px[i] - mx;
+        const dy = py[i] - my;
+        const d2 = dx * dx + dy * dy;
+        if (d2 < REPEL_R2 && d2 > 0.5) {
+          const d  = Math.sqrt(d2);
+          const t  = 1 - d / REPEL_R;     // 0..1 — сильнее у центра
+          const f  = t * t * REPEL_F;
+          pvx[i] += (dx / d) * f;         // вектор ОТ мышки
+          pvy[i] += (dy / d) * f;
         }
       }
 
-      // 3. Затухание
+      // 2. Пружина тянет домой — слабо, без перелёта
+      pvx[i] += (phx[i] - px[i]) * SPRING;
+      pvy[i] += (phy[i] - py[i]) * SPRING;
+
+      // 3. Затухание — гасит скорость, нет осцилляции
       pvx[i] *= DAMP;
       pvy[i] *= DAMP;
 
-      // 4. Движение
+      // 4. Ограничение скорости — частицы не улетают
+      const spd = pvx[i] * pvx[i] + pvy[i] * pvy[i];
+      if (spd > MAX_V * MAX_V) {
+        const s  = MAX_V / Math.sqrt(spd);
+        pvx[i] *= s;
+        pvy[i] *= s;
+      }
+
+      // 5. Позиция
       px[i] += pvx[i];
       py[i] += pvy[i];
 
-      // 5. Точка 1×1 px
+      // 6. Рисуем точку
       ctx.fillRect(px[i] | 0, py[i] | 0, 1, 1);
     }
   }
