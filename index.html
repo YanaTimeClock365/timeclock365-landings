@@ -3,114 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TimeClock 365</title>
+  <title>Particles</title>
   <style>
     html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #f8f8f8; }
     canvas { display: block; width: 100vw; height: 100vh; }
-
-    .hero {
-      position: fixed;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      pointer-events: none;
-      padding: 0 24px;
-    }
-
-    .hero-label {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: rgba(0,0,0,0.35);
-      margin-bottom: 22px;
-    }
-
-    .hero h1 {
-      font-family: 'Georgia', 'Times New Roman', serif;
-      font-size: clamp(42px, 7vw, 96px);
-      font-weight: 400;
-      color: #0d0d0d;
-      line-height: 1.08;
-      letter-spacing: -2px;
-      margin: 0 0 20px;
-    }
-
-    .hero h1 em {
-      font-style: italic;
-      color: rgba(0,0,0,0.45);
-    }
-
-    .hero p {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-      font-size: clamp(15px, 1.8vw, 19px);
-      color: rgba(0,0,0,0.45);
-      max-width: 480px;
-      line-height: 1.65;
-      margin: 0 0 44px;
-      font-weight: 400;
-    }
-
-    .btn-glass {
-      pointer-events: all;
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 14px 34px;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-      color: #0d0d0d;
-      text-decoration: none;
-      border: 1.5px solid rgba(0,0,0,0.75);
-      border-radius: 100px;
-      background: rgba(255,255,255,0.35);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      box-shadow: 0 2px 24px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.6);
-      transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
-    }
-
-    .btn-glass:hover {
-      background: rgba(255,255,255,0.55);
-      box-shadow: 0 4px 32px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.8);
-      transform: translateY(-2px);
-    }
-
-    .btn-glass:active {
-      transform: translateY(0);
-    }
-
-    .btn-arrow {
-      width: 16px;
-      height: 16px;
-      opacity: 0.6;
-      transition: transform 0.2s;
-    }
-    .btn-glass:hover .btn-arrow {
-      transform: translateX(3px);
-    }
   </style>
 </head>
 <body>
 <canvas id="canvas"></canvas>
-
-<div class="hero">
-  <div class="hero-label">Workforce Management</div>
-  <h1>Control time.<br><em>Own the space.</em></h1>
-  <p>Time tracking and door access in one system. Every entry is attendance — automatic, accurate, audit-ready.</p>
-  <a href="door-access-control/" class="btn-glass">
-    See How It Works
-    <svg class="btn-arrow" viewBox="0 0 16 16" fill="none">
-      <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-  </a>
-</div>
 <script>
   const canvas = document.getElementById("canvas");
   const ctx    = canvas.getContext("2d");
