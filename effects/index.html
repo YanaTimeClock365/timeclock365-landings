@@ -7,21 +7,13 @@
 <style>
   html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #111; }
   canvas { display: block; }
-
   .back {
-    position: fixed;
-    top: 24px; left: 32px;
-    z-index: 20;
-    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: rgba(255,255,255,0.35);
-    text-decoration: none;
-    transition: color 0.2s;
+    position: fixed; top: 24px; left: 32px; z-index: 20;
+    font-family: -apple-system, sans-serif; font-size: 11px;
+    font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+    color: rgba(255,255,255,0.3); text-decoration: none; transition: color .2s;
   }
-  .back:hover { color: rgba(255,255,255,0.7); }
+  .back:hover { color: rgba(255,255,255,0.65); }
 </style>
 </head>
 <body>
@@ -31,15 +23,11 @@
 <script>
 const canvas = document.getElementById('c');
 const ctx    = canvas.getContext('2d');
+let W, H, S;
 
-let W, H, S; // S = one section width
-
-// ── Mouse ────────────────────────────────────────────────────────────────────
+// ── Mouse ─────────────────────────────────────────────────────────────────
 let mx = -9999, my = -9999, mActive = false;
-
-window.addEventListener('mousemove', e => {
-  mx = e.clientX; my = e.clientY; mActive = true;
-});
+window.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; mActive = true; });
 window.addEventListener('mouseleave', () => { mActive = false; });
 window.addEventListener('touchmove', e => {
   e.preventDefault();
@@ -48,280 +36,202 @@ window.addEventListener('touchmove', e => {
 window.addEventListener('touchend', () => { mActive = false; });
 
 // ════════════════════════════════════════════════════════════════════════════
-// 1. OIL  (left third)
+// SECTION 1 — Underwater: dark bg, particles attracted to mouse with heavy lag
+//             Particles swarm and trail behind cursor like ink in water
 // ════════════════════════════════════════════════════════════════════════════
-const OIL_N = 480;
-const ox  = new Float32Array(OIL_N), oy  = new Float32Array(OIL_N);
-const ovx = new Float32Array(OIL_N), ovy = new Float32Array(OIL_N);
-const ohx = new Float32Array(OIL_N), ohy = new Float32Array(OIL_N);
-const or_  = new Float32Array(OIL_N);
+const S1_N   = 14000;
+const s1x    = new Float32Array(S1_N);
+const s1y    = new Float32Array(S1_N);
+const s1vx   = new Float32Array(S1_N);
+const s1vy   = new Float32Array(S1_N);
+const s1spd  = new Float32Array(S1_N);  // individual speed multiplier (depth)
 
-const OIL_R  = 75,  OIL_R2 = OIL_R * OIL_R;
-const OIL_F  = 1.8;          // weak push  — oil is heavy
-const OIL_SP = 0.0035;       // very slow spring
-const OIL_D  = 0.968;        // high damp  — viscous
+// Smoothed attractor — lags behind real mouse, creating natural trail
+let s1ax = 0, s1ay = 0;
 
-function oilInit() {
-  for (let i = 0; i < OIL_N; i++) {
-    ox[i] = ohx[i] = Math.random() * S;
-    oy[i] = ohy[i] = Math.random() * H;
-    ovx[i] = ovy[i] = 0;
-    or_[i] = 7 + Math.random() * 11; // big blobs 7–18 px
+const S1_DAMP = 0.93;   // very high damping = thick underwater resistance
+const S1_F    = 0.055;  // weak attraction = slow to respond
+
+function s1Init() {
+  s1ax = S / 2; s1ay = H / 2;
+  for (let i = 0; i < S1_N; i++) {
+    s1x[i]   = Math.random() * S;
+    s1y[i]   = Math.random() * H;
+    s1vx[i]  = 0; s1vy[i] = 0;
+    s1spd[i] = 0.25 + Math.random() * 0.75; // slower particles trail further back
   }
 }
 
-function oilUpdate() {
-  const hit = mActive && mx < S;
-  for (let i = 0; i < OIL_N; i++) {
-    if (hit) {
-      const dx = ox[i] - mx, dy = oy[i] - my;
-      const d2 = dx*dx + dy*dy;
-      if (d2 < OIL_R2 && d2 > 0.5) {
-        const d = Math.sqrt(d2);
-        const t = 1 - d / OIL_R;
-        const f = t * t * OIL_F;
-        ovx[i] += dx/d * f;
-        ovy[i] += dy/d * f;
-      }
+function s1Update() {
+  // Lag attractor drifts toward mouse slowly — creates the "behind" effect
+  if (mActive && mx < S) {
+    s1ax += (mx - s1ax) * 0.055;
+    s1ay += (my - s1ay) * 0.055;
+  }
+
+  for (let i = 0; i < S1_N; i++) {
+    // Attract toward lagged mouse position
+    if (mActive) {
+      const dx = s1ax - s1x[i];
+      const dy = s1ay - s1y[i];
+      const d  = Math.sqrt(dx*dx + dy*dy) + 1;
+      // Stronger pull close-up, weak pull from afar — natural fluid gather
+      const f  = Math.min(S1_F * s1spd[i] * (1 + 60 / d), 1.2);
+      s1vx[i] += dx / d * f;
+      s1vy[i] += dy / d * f;
     }
-    ovx[i] += (ohx[i] - ox[i]) * OIL_SP;
-    ovy[i] += (ohy[i] - oy[i]) * OIL_SP;
-    ovx[i] *= OIL_D; ovy[i] *= OIL_D;
-    ox[i]  += ovx[i]; oy[i]  += ovy[i];
+
+    // Very weak center pull to keep particles from drifting off section
+    s1vx[i] += (S * 0.5 - s1x[i]) * 0.00018;
+    s1vy[i] += (H * 0.5 - s1y[i]) * 0.00018;
+
+    // Heavy damping = underwater resistance
+    s1vx[i] *= S1_DAMP; s1vy[i] *= S1_DAMP;
+
+    s1x[i] += s1vx[i]; s1y[i] += s1vy[i];
   }
 }
 
-function oilDraw() {
-  // Background: deep amber gradient
-  const bg = ctx.createLinearGradient(0, 0, S, H);
-  bg.addColorStop(0, '#B06808');
-  bg.addColorStop(1, '#8C4E04');
-  ctx.fillStyle = bg;
+function s1Draw() {
+  ctx.fillStyle = '#0a0c12';
   ctx.fillRect(0, 0, S, H);
 
-  // Blobs: large soft golden circles
-  for (let i = 0; i < OIL_N; i++) {
-    const spd = Math.hypot(ovx[i], ovy[i]);
-    const g   = Math.min(spd * 0.35, 1);
-    const r   = or_[i] * (1 + g * 0.5);
-
-    const grd = ctx.createRadialGradient(ox[i], oy[i], 0, ox[i], oy[i], r);
-    grd.addColorStop(0,   `rgba(255,215,55,${0.50 + g * 0.2})`);
-    grd.addColorStop(0.6, `rgba(230,160,15,0.22)`);
-    grd.addColorStop(1,   `rgba(200,120,5,0)`);
-    ctx.fillStyle = grd;
-    ctx.beginPath();
-    ctx.arc(ox[i], oy[i], r, 0, Math.PI * 2);
-    ctx.fill();
+  // Single fill pass — tiny dots, all same colour, fast
+  ctx.fillStyle = 'rgba(200,215,255,0.72)';
+  for (let i = 0; i < S1_N; i++) {
+    ctx.fillRect(s1x[i] | 0, s1y[i] | 0, 1, 1);
   }
-
-  // Surface sheen
-  const sh = ctx.createLinearGradient(0, 0, S * 0.6, H * 0.4);
-  sh.addColorStop(0,   'rgba(255,240,140,0.10)');
-  sh.addColorStop(1,   'rgba(255,200,50,0)');
-  ctx.fillStyle = sh;
-  ctx.fillRect(0, 0, S, H);
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-// 2. WATER  (middle third) — height-map ripple
+// SECTION 2 — Texture on light bg: grid of dots displaced by mouse,
+//             shows path through distortion like sand or fine fabric
 // ════════════════════════════════════════════════════════════════════════════
-const WRES = 3;           // px per cell
-let WCols, WRows;
-let wBuf = null, wPrev = null;
-const WDAMP = 0.986;
+const S2_CELL = 9;   // grid spacing px
+let s2Cols, s2Rows;
+let s2dx, s2dy;      // displacement per cell
 
-function waterInit() {
-  WCols = Math.floor(S / WRES);
-  WRows = Math.floor(H / WRES);
-  wBuf  = new Float32Array(WCols * WRows);
-  wPrev = new Float32Array(WCols * WRows);
+const S2_INF_R  = 70;
+const S2_INF_R2 = S2_INF_R * S2_INF_R;
+const S2_PUSH   = 5.5;
+const S2_DECAY  = 0.94;  // how fast displacement fades
+
+function s2Init() {
+  s2Cols = Math.floor(S / S2_CELL) + 1;
+  s2Rows = Math.floor(H / S2_CELL) + 1;
+  s2dx   = new Float32Array(s2Cols * s2Rows);
+  s2dy   = new Float32Array(s2Cols * s2Rows);
 }
 
-function waterUpdate() {
-  if (mActive && mx >= S && mx < 2*S) {
-    const gx = Math.floor((mx - S) / WRES);
-    const gy = Math.floor(my / WRES);
-    const R  = 5;
-    for (let dy = -R; dy <= R; dy++) {
-      for (let dx = -R; dx <= R; dx++) {
-        const nx = gx+dx, ny = gy+dy;
-        if (nx>=0 && nx<WCols && ny>=0 && ny<WRows) {
-          const d = Math.sqrt(dx*dx+dy*dy);
-          if (d <= R) wBuf[ny*WCols+nx] += (1-d/R)*90;
+function s2Update() {
+  const inS2 = mActive && mx >= S && mx < 2 * S;
+
+  for (let r = 0; r < s2Rows; r++) {
+    for (let c = 0; c < s2Cols; c++) {
+      const idx = r * s2Cols + c;
+      const gx  = S + c * S2_CELL;
+      const gy  = r * S2_CELL;
+
+      if (inS2) {
+        const dx = gx - mx, dy = gy - my;
+        const d2 = dx*dx + dy*dy;
+        if (d2 < S2_INF_R2 && d2 > 0.5) {
+          const d = Math.sqrt(d2);
+          const t = (1 - d / S2_INF_R) * (1 - d / S2_INF_R);
+          s2dx[idx] += dx / d * t * S2_PUSH;
+          s2dy[idx] += dy / d * t * S2_PUSH;
         }
       }
-    }
-  }
 
-  const nxt = wPrev;
-  for (let y = 1; y < WRows-1; y++) {
-    for (let x = 1; x < WCols-1; x++) {
-      const i = y*WCols + x;
-      nxt[i] = (wBuf[i-1] + wBuf[i+1] + wBuf[i-WCols] + wBuf[i+WCols]) * 0.5 - nxt[i];
-      nxt[i] *= WDAMP;
+      // Decay back to grid position
+      s2dx[idx] *= S2_DECAY;
+      s2dy[idx] *= S2_DECAY;
     }
   }
-  // swap
-  wPrev = wBuf;
-  wBuf  = nxt;
 }
 
-function waterDraw() {
+function s2Draw() {
   // Background
-  ctx.fillStyle = '#091E38';
+  ctx.fillStyle = '#f4f2ee';
   ctx.fillRect(S, 0, S, H);
 
-  // Ripple cells
-  const MX = 65;
-  for (let y = 0; y < WRows; y++) {
-    for (let x = 0; x < WCols; x++) {
-      const h = wBuf[y*WCols + x];
-      if (Math.abs(h) < 0.8) continue;
-      const t  = Math.max(-1, Math.min(1, h / MX));
-      const li = t > 0 ? t : 0;
-      const dk = t < 0 ? -t : 0;
-      const r  = Math.floor(15  + li*100 - dk*8);
-      const g  = Math.floor(60  + li*140 - dk*20);
-      const b  = Math.floor(110 + li*145 - dk*35);
-      const a  = Math.min(0.85, Math.abs(t) * 1.8);
-      ctx.fillStyle = `rgba(${r},${g},${b},${a})`;
-      ctx.fillRect(S + x*WRES, y*WRES, WRES, WRES);
+  // Displaced grid dots
+  for (let r = 0; r < s2Rows; r++) {
+    for (let c = 0; c < s2Cols; c++) {
+      const idx = r * s2Cols + c;
+      const ddx = s2dx[idx], ddy = s2dy[idx];
+      const dist = Math.sqrt(ddx*ddx + ddy*ddy);
+      const alpha = 0.18 + Math.min(dist / S2_PUSH, 1) * 0.55;
+      const shade = Math.floor(140 - Math.min(dist / S2_PUSH, 1) * 90);
+
+      ctx.fillStyle = `rgba(${shade},${shade},${shade},${alpha})`;
+      const px = S + c * S2_CELL + ddx;
+      const py = r * S2_CELL + ddy;
+      ctx.beginPath();
+      ctx.arc(px, py, 1.2, 0, Math.PI * 2);
+      ctx.fill();
     }
   }
-
-  // Soft overlay shimmer
-  const sh = ctx.createLinearGradient(S, 0, 2*S, H);
-  sh.addColorStop(0,   'rgba(80,150,220,0.05)');
-  sh.addColorStop(0.5, 'rgba(120,190,255,0.09)');
-  sh.addColorStop(1,   'rgba(50,130,200,0.04)');
-  ctx.fillStyle = sh;
-  ctx.fillRect(S, 0, S, H);
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-// 3. WOOD  (right third) — grain background + flying splinters
+// SECTION 3 — Dense cloud: light bg, 38 000 tiny black particles, repulsion
 // ════════════════════════════════════════════════════════════════════════════
-const WD_N = 380;
-const wx   = new Float32Array(WD_N), wy   = new Float32Array(WD_N);
-const wvx  = new Float32Array(WD_N), wvy  = new Float32Array(WD_N);
-const whx  = new Float32Array(WD_N), why  = new Float32Array(WD_N);
-const wang = new Float32Array(WD_N), whan = new Float32Array(WD_N);
-const wvan = new Float32Array(WD_N);
-const wlen = new Float32Array(WD_N), wwid = new Float32Array(WD_N);
-const wclr = new Uint8Array(WD_N);  // shade value 0-255
+const S3_N   = 38000;
+const s3x    = new Float32Array(S3_N);
+const s3y    = new Float32Array(S3_N);
+const s3vx   = new Float32Array(S3_N);
+const s3vy   = new Float32Array(S3_N);
+const s3hx   = new Float32Array(S3_N);
+const s3hy   = new Float32Array(S3_N);
 
-const WD_R  = 85,  WD_R2 = WD_R * WD_R;
-const WD_F  = 11;
-const WD_SP = 0.032;
-const WD_D  = 0.875;
-const WD_AD = 0.88;
+const S3_R   = 90, S3_R2 = S3_R * S3_R;
+const S3_F   = 5.5;
+const S3_SP  = 0.018;
+const S3_D   = 0.87;
+const S3_MV  = 10;
 
-let grainCanvas = null;
-
-function buildGrain() {
-  grainCanvas = document.createElement('canvas');
-  grainCanvas.width  = S;
-  grainCanvas.height = H;
-  const gc = grainCanvas.getContext('2d');
-
-  // Base warm wood tone
-  gc.fillStyle = '#7A4A22';
-  gc.fillRect(0, 0, S, H);
-
-  // Horizontal grain bands
-  let y = 0;
-  while (y < H) {
-    const step   = 1.5 + Math.random() * 7;
-    const lum    = 60 + Math.random() * 50;
-    const alpha  = 0.12 + Math.random() * 0.28;
-    gc.beginPath();
-    gc.moveTo(0, y);
-    let cx = 0;
-    while (cx < S) {
-      const nx = cx + 15 + Math.random() * 35;
-      gc.lineTo(nx, y + (Math.random() - 0.5) * 5);
-      cx = nx;
-    }
-    gc.strokeStyle = `rgba(${lum+40},${lum},${lum-25},${alpha})`;
-    gc.lineWidth = 0.4 + Math.random() * 1.6;
-    gc.stroke();
-    y += step;
-  }
-
-  // 2–4 knots
-  const kn = 2 + Math.floor(Math.random() * 3);
-  for (let k = 0; k < kn; k++) {
-    const kx = 20 + Math.random() * (S-40);
-    const ky = 20 + Math.random() * (H-40);
-    for (let r = 28; r > 1; r -= 3 + Math.random()*4) {
-      gc.beginPath();
-      gc.ellipse(kx, ky, r, r*0.38, 0.1, 0, Math.PI*2);
-      gc.strokeStyle = `rgba(40,20,5,${0.05 + Math.random()*0.1})`;
-      gc.lineWidth = 0.7;
-      gc.stroke();
-    }
-  }
-
-  // Subtle vignette
-  const vg = gc.createRadialGradient(S/2, H/2, H*0.2, S/2, H/2, H*0.8);
-  vg.addColorStop(0, 'rgba(0,0,0,0)');
-  vg.addColorStop(1, 'rgba(0,0,0,0.18)');
-  gc.fillStyle = vg;
-  gc.fillRect(0, 0, S, H);
-}
-
-function woodInit() {
-  buildGrain();
-  for (let i = 0; i < WD_N; i++) {
-    wx[i]  = whx[i] = 2*S + Math.random() * S;
-    wy[i]  = why[i] = Math.random() * H;
-    wvx[i] = wvy[i] = wvan[i] = 0;
-    wang[i]= whan[i]= Math.random() * Math.PI;
-    wlen[i]= 9  + Math.random() * 18;
-    wwid[i]= 1  + Math.random() * 2;
-    wclr[i]= 55 + Math.floor(Math.random() * 55); // brown shade
+function s3Init() {
+  for (let i = 0; i < S3_N; i++) {
+    s3x[i]  = s3hx[i] = 2*S + Math.random() * S;
+    s3y[i]  = s3hy[i] = Math.random() * H;
+    s3vx[i] = 0; s3vy[i] = 0;
   }
 }
 
-function woodUpdate() {
-  const hit = mActive && mx >= 2*S;
-  for (let i = 0; i < WD_N; i++) {
-    if (hit) {
-      const dx = wx[i] - mx, dy = wy[i] - my;
+function s3Update() {
+  const inS3 = mActive && mx >= 2*S;
+  for (let i = 0; i < S3_N; i++) {
+    if (inS3) {
+      const dx = s3x[i] - mx, dy = s3y[i] - my;
       const d2 = dx*dx + dy*dy;
-      if (d2 < WD_R2 && d2 > 0.5) {
-        const d  = Math.sqrt(d2);
-        const t  = 1 - d / WD_R;
-        const f  = t * t * WD_F;
-        wvx[i]  += dx/d * f;
-        wvy[i]  += dy/d * f;
-        wvan[i] += (Math.random()-0.5) * t * 0.35;
+      if (d2 < S3_R2 && d2 > 0.5) {
+        const d = Math.sqrt(d2);
+        const t = 1 - d / S3_R;
+        s3vx[i] += dx/d * t*t * S3_F;
+        s3vy[i] += dy/d * t*t * S3_F;
       }
     }
-    wvx[i]  += (whx[i] - wx[i]) * WD_SP;
-    wvy[i]  += (why[i] - wy[i]) * WD_SP;
-    wvx[i]  *= WD_D;  wvy[i]  *= WD_D;
-    wx[i]   += wvx[i]; wy[i]  += wvy[i];
-    wvan[i] += (whan[i] - wang[i]) * 0.045;
-    wvan[i] *= WD_AD;
-    wang[i] += wvan[i];
+    s3vx[i] += (s3hx[i] - s3x[i]) * S3_SP;
+    s3vy[i] += (s3hy[i] - s3y[i]) * S3_SP;
+    s3vx[i] *= S3_D; s3vy[i] *= S3_D;
+
+    const spd = s3vx[i]*s3vx[i] + s3vy[i]*s3vy[i];
+    if (spd > S3_MV * S3_MV) {
+      const s = S3_MV / Math.sqrt(spd);
+      s3vx[i] *= s; s3vy[i] *= s;
+    }
+    s3x[i] += s3vx[i]; s3y[i] += s3vy[i];
   }
 }
 
-function woodDraw() {
-  ctx.drawImage(grainCanvas, 2*S, 0);
+function s3Draw() {
+  ctx.fillStyle = '#f8f8f6';
+  ctx.fillRect(2*S, 0, S, H);
 
-  for (let i = 0; i < WD_N; i++) {
-    ctx.save();
-    ctx.translate(wx[i], wy[i]);
-    ctx.rotate(wang[i]);
-    const spd   = Math.hypot(wvx[i], wvy[i]);
-    const alpha = Math.min(0.55 + spd * 0.06, 0.95);
-    const c     = wclr[i];
-    ctx.fillStyle = `rgba(${c+35},${c},${c-20},${alpha})`;
-    ctx.fillRect(-wlen[i]/2, -wwid[i]/2, wlen[i], wwid[i]);
-    ctx.restore();
+  ctx.fillStyle = 'rgba(28,28,28,0.78)';
+  for (let i = 0; i < S3_N; i++) {
+    ctx.fillRect(s3x[i] | 0, s3y[i] | 0, 1, 1);
   }
 }
 
@@ -329,27 +239,24 @@ function woodDraw() {
 // DIVIDERS + LABELS
 // ════════════════════════════════════════════════════════════════════════════
 function drawUI() {
-  // Dividers
-  ctx.strokeStyle = 'rgba(255,255,255,0.12)';
-  ctx.lineWidth = 1;
-  ctx.setLineDash([5, 9]);
-  ctx.beginPath(); ctx.moveTo(S, 0);   ctx.lineTo(S, H);   ctx.stroke();
+  ctx.strokeStyle = 'rgba(120,120,120,0.2)';
+  ctx.lineWidth   = 1;
+  ctx.setLineDash([4, 8]);
+  ctx.beginPath(); ctx.moveTo(S,   0); ctx.lineTo(S,   H); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(2*S, 0); ctx.lineTo(2*S, H); ctx.stroke();
   ctx.setLineDash([]);
 
-  // Labels
-  ctx.textAlign    = 'center';
-  ctx.textBaseline = 'top';
-  ctx.font         = '700 10px -apple-system,BlinkMacSystemFont,sans-serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  ctx.font = '600 10px -apple-system,sans-serif';
 
-  ctx.fillStyle = 'rgba(255,210,70,0.40)';
-  ctx.fillText('OIL', S/2, 24);
+  ctx.fillStyle = 'rgba(180,200,255,0.35)';
+  ctx.fillText('UNDERWATER', S/2, 24);
 
-  ctx.fillStyle = 'rgba(110,195,255,0.40)';
-  ctx.fillText('WATER', S + S/2, 24);
+  ctx.fillStyle = 'rgba(80,80,80,0.3)';
+  ctx.fillText('TEXTURE', S + S/2, 24);
 
-  ctx.fillStyle = 'rgba(220,165,90,0.40)';
-  ctx.fillText('WOOD', 2*S + S/2, 24);
+  ctx.fillStyle = 'rgba(30,30,30,0.25)';
+  ctx.fillText('DUST', 2*S + S/2, 24);
 }
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -359,19 +266,15 @@ function init() {
   W = canvas.width  = window.innerWidth;
   H = canvas.height = window.innerHeight;
   S = W / 3;
-  oilInit();
-  waterInit();
-  woodInit();
+  s1Init();
+  s2Init();
+  s3Init();
 }
 
 function loop() {
   requestAnimationFrame(loop);
-  oilUpdate();
-  waterUpdate();
-  woodUpdate();
-  oilDraw();
-  waterDraw();
-  woodDraw();
+  s1Update(); s2Update(); s3Update();
+  s1Draw();   s2Draw();   s3Draw();
   drawUI();
 }
 
