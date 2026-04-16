@@ -3,693 +3,135 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TimeClock 365 — Time Tracking + Door Access Control in One System</title>
-<meta name="description" content="Unified time tracking and door access control. Entry = attendance. No double entry, no payroll errors.">
+<title>Particle Effect</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-    background: #0a0e1a;
-    color: #fff;
-    overflow-x: hidden;
-  }
-
-  /* NAV */
-  nav {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 20px 48px;
-    background: rgba(10, 14, 26, 0.85);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-  }
-
-  .logo {
-    font-size: 17px;
-    font-weight: 700;
-    color: #fff;
-    text-decoration: none;
-    letter-spacing: -0.3px;
-  }
-  .logo span { color: #4D8EF7; }
-
-  .nav-links {
-    display: flex;
-    gap: 32px;
-    list-style: none;
-  }
-  .nav-links a {
-    color: rgba(255,255,255,0.6);
-    text-decoration: none;
-    font-size: 14px;
-    transition: color 0.2s;
-  }
-  .nav-links a:hover { color: #fff; }
-
-  .nav-cta {
-    background: #4D8EF7;
-    color: #fff;
-    padding: 10px 22px;
-    border-radius: 8px;
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 600;
-    transition: background 0.2s, transform 0.15s;
-  }
-  .nav-cta:hover { background: #3479E9; transform: translateY(-1px); }
-
-  /* HERO */
-  .hero {
-    position: relative;
-    width: 100%;
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    background: #070b14;
     overflow: hidden;
+    width: 100vw;
+    height: 100vh;
   }
 
-  #particleCanvas {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
+  canvas {
+    display: block;
   }
 
-  .hero-content {
-    position: relative;
-    z-index: 2;
-    text-align: center;
-    max-width: 780px;
-    padding: 0 32px;
-  }
-
-  .hero-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: rgba(77, 142, 247, 0.12);
-    border: 1px solid rgba(77, 142, 247, 0.3);
-    color: #7aaeff;
-    font-size: 12px;
-    font-weight: 600;
-    padding: 6px 14px;
-    border-radius: 20px;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    margin-bottom: 28px;
-  }
-  .hero-badge::before {
-    content: '';
-    width: 6px; height: 6px;
-    background: #4D8EF7;
-    border-radius: 50%;
-    box-shadow: 0 0 8px #4D8EF7;
-  }
-
-  .hero h1 {
-    font-size: clamp(36px, 5.5vw, 62px);
-    font-weight: 800;
-    line-height: 1.1;
-    letter-spacing: -1.5px;
-    margin-bottom: 24px;
-    color: #fff;
-  }
-  .hero h1 span {
-    background: linear-gradient(135deg, #4D8EF7 0%, #a78bfa 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .hero p {
-    font-size: 18px;
-    color: rgba(255,255,255,0.58);
-    line-height: 1.75;
-    max-width: 560px;
-    margin: 0 auto 40px;
-  }
-
-  .hero-actions {
-    display: flex;
-    gap: 16px;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-
-  .btn-primary {
-    background: #4D8EF7;
-    color: #fff;
-    padding: 16px 36px;
-    border-radius: 10px;
-    text-decoration: none;
-    font-size: 15px;
-    font-weight: 700;
-    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
-    box-shadow: 0 0 32px rgba(77, 142, 247, 0.35);
-  }
-  .btn-primary:hover {
-    background: #3479E9;
-    transform: translateY(-2px);
-    box-shadow: 0 0 48px rgba(77, 142, 247, 0.5);
-  }
-
-  .btn-secondary {
-    background: rgba(255,255,255,0.06);
-    color: rgba(255,255,255,0.8);
-    padding: 16px 36px;
-    border-radius: 10px;
-    text-decoration: none;
-    font-size: 15px;
-    font-weight: 600;
-    border: 1px solid rgba(255,255,255,0.12);
-    transition: background 0.2s, transform 0.15s;
-  }
-  .btn-secondary:hover {
-    background: rgba(255,255,255,0.1);
-    transform: translateY(-2px);
-  }
-
-  .hero-sub {
-    margin-top: 20px;
-    font-size: 12px;
-    color: rgba(255,255,255,0.3);
-  }
-
-  /* SCROLL INDICATOR */
-  .scroll-hint {
-    position: absolute;
+  .hint {
+    position: fixed;
     bottom: 40px;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 2;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    color: rgba(255,255,255,0.25);
-    font-size: 11px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    animation: bounce 2s infinite;
-  }
-  .scroll-hint svg { opacity: 0.4; }
-
-  @keyframes bounce {
-    0%, 100% { transform: translateX(-50%) translateY(0); }
-    50% { transform: translateX(-50%) translateY(6px); }
-  }
-
-  /* FEATURES */
-  .features {
-    padding: 100px 48px;
-    max-width: 1100px;
-    margin: 0 auto;
-  }
-
-  .section-label {
-    font-size: 12px;
-    font-weight: 700;
-    color: #4D8EF7;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    text-align: center;
-    margin-bottom: 12px;
-  }
-
-  .features h2 {
-    font-size: clamp(26px, 3.5vw, 40px);
-    font-weight: 800;
-    text-align: center;
-    letter-spacing: -0.8px;
-    margin-bottom: 64px;
-    color: #fff;
-  }
-  .features h2 span { color: #4D8EF7; }
-
-  .feature-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-  }
-  @media(max-width: 780px) { .feature-grid { grid-template-columns: 1fr; } }
-
-  .feature-card {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 16px;
-    padding: 32px;
-    transition: border-color 0.2s, transform 0.2s;
-  }
-  .feature-card:hover {
-    border-color: rgba(77, 142, 247, 0.3);
-    transform: translateY(-4px);
-  }
-
-  .feature-icon {
-    width: 44px; height: 44px;
-    background: rgba(77, 142, 247, 0.12);
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 22px;
-    margin-bottom: 20px;
-  }
-
-  .feature-card h3 {
-    font-size: 17px;
-    font-weight: 700;
-    color: #fff;
-    margin-bottom: 10px;
-    letter-spacing: -0.2px;
-  }
-
-  .feature-card p {
-    font-size: 14px;
-    color: rgba(255,255,255,0.5);
-    line-height: 1.7;
-  }
-
-  /* PROBLEM SECTION */
-  .problem {
-    background: rgba(77, 142, 247, 0.05);
-    border-top: 1px solid rgba(77, 142, 247, 0.12);
-    border-bottom: 1px solid rgba(77, 142, 247, 0.12);
-    padding: 80px 48px;
-    text-align: center;
-  }
-
-  .problem h2 {
-    font-size: clamp(24px, 3.5vw, 38px);
-    font-weight: 800;
-    letter-spacing: -0.8px;
-    margin-bottom: 16px;
-  }
-
-  .problem p {
-    font-size: 16px;
-    color: rgba(255,255,255,0.5);
-    max-width: 580px;
-    margin: 0 auto 48px;
-    line-height: 1.75;
-  }
-
-  .stat-row {
-    display: flex;
-    gap: 64px;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-
-  .stat { text-align: center; }
-  .stat-num {
-    font-size: 42px;
-    font-weight: 800;
-    color: #4D8EF7;
-    letter-spacing: -1px;
-    display: block;
-  }
-  .stat-label {
+    color: rgba(255,255,255,0.18);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-size: 13px;
-    color: rgba(255,255,255,0.45);
-    margin-top: 4px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    pointer-events: none;
+    animation: fade 3s ease-in-out infinite alternate;
   }
 
-  /* HOW IT WORKS */
-  .how {
-    padding: 100px 48px;
-    max-width: 880px;
-    margin: 0 auto;
-  }
-
-  .how h2 {
-    font-size: clamp(26px, 3.5vw, 38px);
-    font-weight: 800;
-    text-align: center;
-    letter-spacing: -0.8px;
-    margin-bottom: 60px;
-  }
-
-  .steps {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
-
-  .step {
-    display: grid;
-    grid-template-columns: 60px 1fr;
-    gap: 24px;
-    position: relative;
-    padding-bottom: 40px;
-  }
-  .step:last-child { padding-bottom: 0; }
-  .step:last-child .step-line { display: none; }
-
-  .step-num-col {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0;
-  }
-
-  .step-num {
-    width: 44px; height: 44px;
-    background: linear-gradient(135deg, #4D8EF7, #a78bfa);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    font-weight: 800;
-    color: #fff;
-    flex-shrink: 0;
-  }
-
-  .step-line {
-    width: 2px;
-    flex: 1;
-    background: linear-gradient(to bottom, rgba(77,142,247,0.3), rgba(77,142,247,0));
-    margin-top: 8px;
-  }
-
-  .step-body {
-    padding-top: 8px;
-  }
-
-  .step-body h3 {
-    font-size: 18px;
-    font-weight: 700;
-    margin-bottom: 8px;
-    color: #fff;
-  }
-  .step-body p {
-    font-size: 14px;
-    color: rgba(255,255,255,0.5);
-    line-height: 1.7;
-  }
-
-  /* CTA SECTION */
-  .cta-section {
-    padding: 100px 48px;
-    text-align: center;
-    background: radial-gradient(ellipse at center, rgba(77,142,247,0.12) 0%, transparent 70%);
-  }
-
-  .cta-section h2 {
-    font-size: clamp(28px, 4vw, 46px);
-    font-weight: 800;
-    letter-spacing: -1px;
-    margin-bottom: 16px;
-  }
-  .cta-section p {
-    font-size: 17px;
-    color: rgba(255,255,255,0.5);
-    margin-bottom: 40px;
-  }
-
-  /* FOOTER */
-  footer {
-    border-top: 1px solid rgba(255,255,255,0.07);
-    padding: 32px 48px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    color: rgba(255,255,255,0.25);
-    font-size: 13px;
-  }
-  footer a { color: rgba(255,255,255,0.35); text-decoration: none; }
-  footer a:hover { color: rgba(255,255,255,0.7); }
-
-  @media(max-width: 600px) {
-    nav { padding: 16px 24px; }
-    .nav-links { display: none; }
-    .features, .problem, .how, .cta-section { padding-left: 24px; padding-right: 24px; }
-    footer { flex-direction: column; gap: 8px; text-align: center; }
+  @keyframes fade {
+    from { opacity: 0.4; }
+    to   { opacity: 0.1; }
   }
 </style>
 </head>
 <body>
 
-<!-- NAV -->
-<nav>
-  <a href="#" class="logo">TimeClock <span>365</span></a>
-  <ul class="nav-links">
-    <li><a href="#features">Features</a></li>
-    <li><a href="#how">How it works</a></li>
-    <li><a href="#pricing">Pricing</a></li>
-  </ul>
-  <a href="#demo" class="nav-cta">Book a Demo</a>
-</nav>
-
-<!-- HERO -->
-<section class="hero" id="hero">
-  <canvas id="particleCanvas"></canvas>
-
-  <div class="hero-content">
-    <div class="hero-badge">Time Tracking + Door Access Control</div>
-    <h1>One system.<br><span>Full control.</span></h1>
-    <p>Door entry becomes attendance automatically. No manual timesheets, no payroll errors, no separate systems.</p>
-    <div class="hero-actions">
-      <a href="#demo" class="btn-primary">Book a Demo</a>
-      <a href="#features" class="btn-secondary">See How It Works</a>
-    </div>
-    <p class="hero-sub">No credit card required &nbsp;·&nbsp; Setup in days, not months</p>
-  </div>
-
-  <div class="scroll-hint">
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-      <path d="M8 3v10M4 9l4 4 4-4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-    Scroll
-  </div>
-</section>
-
-<!-- FEATURES -->
-<section class="features" id="features">
-  <p class="section-label">Why TimeClock 365</p>
-  <h2>Everything you need.<br><span>Nothing you don't.</span></h2>
-
-  <div class="feature-grid">
-    <div class="feature-card">
-      <div class="feature-icon">🚪</div>
-      <h3>Door Entry = Attendance</h3>
-      <p>Every badge tap or fingerprint scan is automatically logged as a time entry. Zero duplicate work for HR.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">📊</div>
-      <h3>Payroll-Ready Reports</h3>
-      <p>Overtime, vacation, and leave are calculated automatically. Export to your payroll system in one click.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🏢</div>
-      <h3>Real-Time Visibility</h3>
-      <p>See exactly who is on-site, in which zone, at any moment. Live dashboard for operations managers.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🔒</div>
-      <h3>Access Control</h3>
-      <p>Manage who can enter which areas. Set schedules, issue temporary passes, revoke access instantly.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🌐</div>
-      <h3>Remote + Field + Office</h3>
-      <p>Works for all employee types simultaneously. Mobile check-in for field workers, badge for office.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🔗</div>
-      <h3>SSO & Integrations</h3>
-      <p>SAML, Active Directory, and your existing HR tools. IT managers get full control over permissions.</p>
-    </div>
-  </div>
-</section>
-
-<!-- PROBLEM -->
-<section class="problem">
-  <h2>Two systems. Twice the work.<br>Zero visibility.</h2>
-  <p>Most companies run a time tracker AND a separate door access system. They don't talk to each other. Someone reconciles them manually every month.</p>
-  <div class="stat-row">
-    <div class="stat">
-      <span class="stat-num">4.2h</span>
-      <div class="stat-label">Avg. HR hours lost per week<br>to manual reconciliation</div>
-    </div>
-    <div class="stat">
-      <span class="stat-num">23%</span>
-      <div class="stat-label">Of payroll runs contain<br>at least one error</div>
-    </div>
-    <div class="stat">
-      <span class="stat-num">2×</span>
-      <div class="stat-label">What you pay when you run<br>two disconnected systems</div>
-    </div>
-  </div>
-</section>
-
-<!-- HOW IT WORKS -->
-<section class="how" id="how">
-  <p class="section-label">How It Works</p>
-  <h2>From door tap to payroll.<br>Automatically.</h2>
-
-  <div class="steps">
-    <div class="step">
-      <div class="step-num-col">
-        <div class="step-num">1</div>
-        <div class="step-line"></div>
-      </div>
-      <div class="step-body">
-        <h3>Employee taps badge or fingerprint at the door</h3>
-        <p>Works with existing access hardware — fingerprint readers, RFID cards, mobile NFC. No new infrastructure required.</p>
-      </div>
-    </div>
-    <div class="step">
-      <div class="step-num-col">
-        <div class="step-num">2</div>
-        <div class="step-line"></div>
-      </div>
-      <div class="step-body">
-        <h3>System logs entry as attendance automatically</h3>
-        <p>TimeClock 365 captures the event in real time. Entry = clock-in. Exit = clock-out. No manual step needed from the employee or HR.</p>
-      </div>
-    </div>
-    <div class="step">
-      <div class="step-num-col">
-        <div class="step-num">3</div>
-        <div class="step-line"></div>
-      </div>
-      <div class="step-body">
-        <h3>HR gets a payroll-ready report at end of period</h3>
-        <p>Overtime, missed days, and exceptions are flagged automatically. Export directly to your payroll provider — no manual consolidation.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- CTA -->
-<section class="cta-section" id="demo">
-  <h2>Ready to eliminate<br>the double work?</h2>
-  <p>Book a 30-minute demo. We'll show you exactly how it fits your setup.</p>
-  <div class="hero-actions">
-    <a href="#" class="btn-primary">Book a Demo</a>
-    <a href="#" class="btn-secondary">Start Free Trial</a>
-  </div>
-</section>
-
-<!-- FOOTER -->
-<footer>
-  <span>© 2026 TimeClock 365. All rights reserved.</span>
-  <div style="display:flex; gap:24px;">
-    <a href="#">Privacy</a>
-    <a href="#">Terms</a>
-    <a href="#">Contact</a>
-  </div>
-</footer>
+<canvas id="c"></canvas>
+<div class="hint">Move your mouse</div>
 
 <script>
-// ── PARTICLE CANVAS EFFECT ──────────────────────────────────────────────────
-const canvas = document.getElementById('particleCanvas');
-const ctx = canvas.getContext('2d');
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
 
 let W, H, particles;
-const MOUSE = { x: -9999, y: -9999 };
 
-// Config
-const PARTICLE_COUNT = 120;
-const MOUSE_RADIUS   = 140;    // repulsion radius
-const REPEL_STRENGTH = 6;      // how hard they flee
-const RETURN_SPEED   = 0.055;  // spring back speed
-const DAMPING        = 0.82;   // velocity damping
-const BASE_RADIUS    = 2.2;
-const GLOW_RADIUS    = 4;
+const MOUSE       = { x: -9999, y: -9999 };
+const COUNT       = 160;
+const RADIUS      = 160;   // mouse influence zone
+const REPEL       = 7;     // push strength
+const SPRING      = 0.048; // return speed
+const DAMP        = 0.80;  // velocity damping
 
-class Particle {
-  constructor() {
-    this.reset();
-  }
+// colour palette  blue → violet → cyan
+const HUES = [200, 215, 230, 250, 270, 190];
 
-  reset() {
-    this.ox = Math.random() * W;   // original x
-    this.oy = Math.random() * H;   // original y
+class Dot {
+  constructor() { this.spawn(); }
+
+  spawn() {
+    this.ox = Math.random() * W;
+    this.oy = Math.random() * H;
     this.x  = this.ox;
     this.y  = this.oy;
     this.vx = 0;
     this.vy = 0;
-
-    // visual variance
-    this.r     = BASE_RADIUS * (0.5 + Math.random() * 1.2);
-    this.alpha = 0.2 + Math.random() * 0.5;
-    this.hue   = 210 + Math.random() * 50;  // blue → violet
+    this.r     = 1.5 + Math.random() * 2;
+    this.alpha = 0.25 + Math.random() * 0.45;
+    this.hue   = HUES[Math.floor(Math.random() * HUES.length)];
+    this.sat   = 70 + Math.random() * 25;
   }
 
-  update() {
-    // spring back to origin
-    const dx = this.ox - this.x;
-    const dy = this.oy - this.y;
-    this.vx += dx * RETURN_SPEED;
-    this.vy += dy * RETURN_SPEED;
+  step() {
+    // spring towards home
+    this.vx += (this.ox - this.x) * SPRING;
+    this.vy += (this.oy - this.y) * SPRING;
 
     // repel from mouse
-    const mdx = this.x - MOUSE.x;
-    const mdy = this.y - MOUSE.y;
-    const dist = Math.sqrt(mdx * mdx + mdy * mdy);
-
-    if (dist < MOUSE_RADIUS && dist > 0.5) {
-      const force = (1 - dist / MOUSE_RADIUS) * REPEL_STRENGTH;
-      this.vx += (mdx / dist) * force * 1.8;
-      this.vy += (mdy / dist) * force * 1.8;
+    const dx = this.x - MOUSE.x;
+    const dy = this.y - MOUSE.y;
+    const d  = Math.hypot(dx, dy);
+    if (d < RADIUS && d > 1) {
+      const f = (1 - d / RADIUS) * REPEL;
+      this.vx += (dx / d) * f * 2;
+      this.vy += (dy / d) * f * 2;
     }
 
-    // damping
-    this.vx *= DAMPING;
-    this.vy *= DAMPING;
-
-    this.x += this.vx;
-    this.y += this.vy;
+    this.vx *= DAMP;
+    this.vy *= DAMP;
+    this.x  += this.vx;
+    this.y  += this.vy;
   }
 
   draw() {
-    const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
-    const glow  = Math.min(speed * 0.9, 1);  // 0..1 glow factor when moving
-    const r     = this.r + glow * GLOW_RADIUS;
-    const alpha = this.alpha + glow * 0.4;
+    const speed = Math.hypot(this.vx, this.vy);
+    const glow  = Math.min(speed / 4, 1);
+
+    const r = this.r + glow * 5;
+    const a = Math.min(this.alpha + glow * 0.5, 1);
+
+    if (glow > 0.05) {
+      const g = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, r * 3);
+      g.addColorStop(0, `hsla(${this.hue},${this.sat}%,75%,${a})`);
+      g.addColorStop(1, `hsla(${this.hue},${this.sat}%,75%,0)`);
+      ctx.fillStyle = g;
+    } else {
+      ctx.fillStyle = `hsla(${this.hue},${this.sat}%,68%,${a})`;
+    }
 
     ctx.beginPath();
     ctx.arc(this.x, this.y, r, 0, Math.PI * 2);
-
-    if (glow > 0.05) {
-      // glowing dot
-      const grad = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, r * 2.5);
-      grad.addColorStop(0, `hsla(${this.hue}, 90%, 75%, ${alpha})`);
-      grad.addColorStop(1, `hsla(${this.hue}, 90%, 75%, 0)`);
-      ctx.fillStyle = grad;
-    } else {
-      ctx.fillStyle = `hsla(${this.hue}, 80%, 70%, ${alpha})`;
-    }
-
     ctx.fill();
   }
 }
 
-// draw faint connections between nearby particles
-function drawConnections() {
-  const MAX_DIST = 95;
+function drawLines() {
+  const MAX = 100;
   for (let i = 0; i < particles.length; i++) {
     for (let j = i + 1; j < particles.length; j++) {
-      const dx = particles[i].x - particles[j].x;
-      const dy = particles[i].y - particles[j].y;
-      const d  = Math.sqrt(dx*dx + dy*dy);
-      if (d < MAX_DIST) {
-        const alpha = (1 - d / MAX_DIST) * 0.12;
+      const d = Math.hypot(
+        particles[i].x - particles[j].x,
+        particles[i].y - particles[j].y
+      );
+      if (d < MAX) {
         ctx.beginPath();
         ctx.moveTo(particles[i].x, particles[i].y);
         ctx.lineTo(particles[j].x, particles[j].y);
-        ctx.strokeStyle = `rgba(100, 160, 255, ${alpha})`;
-        ctx.lineWidth = 0.8;
+        ctx.strokeStyle = `rgba(120,170,255,${(1 - d / MAX) * 0.1})`;
+        ctx.lineWidth = 0.7;
         ctx.stroke();
       }
     }
@@ -699,40 +141,32 @@ function drawConnections() {
 function init() {
   W = canvas.width  = window.innerWidth;
   H = canvas.height = window.innerHeight;
-  particles = Array.from({ length: PARTICLE_COUNT }, () => new Particle());
+  particles = Array.from({ length: COUNT }, () => new Dot());
 }
 
 function loop() {
   ctx.clearRect(0, 0, W, H);
-  drawConnections();
-  particles.forEach(p => { p.update(); p.draw(); });
+  drawLines();
+  for (const p of particles) { p.step(); p.draw(); }
   requestAnimationFrame(loop);
 }
 
-// Events
-window.addEventListener('resize', () => {
-  W = canvas.width  = window.innerWidth;
-  H = canvas.height = window.innerHeight;
-  particles.forEach(p => p.reset());
-});
+window.addEventListener('resize', init);
 
 window.addEventListener('mousemove', e => {
   MOUSE.x = e.clientX;
   MOUSE.y = e.clientY;
 });
-
 window.addEventListener('mouseleave', () => {
   MOUSE.x = -9999;
   MOUSE.y = -9999;
 });
 
-// Touch support
 window.addEventListener('touchmove', e => {
   e.preventDefault();
   MOUSE.x = e.touches[0].clientX;
   MOUSE.y = e.touches[0].clientY;
 }, { passive: false });
-
 window.addEventListener('touchend', () => {
   MOUSE.x = -9999;
   MOUSE.y = -9999;
