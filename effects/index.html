@@ -44,46 +44,42 @@ const s1x    = new Float32Array(S1_N);
 const s1y    = new Float32Array(S1_N);
 const s1vx   = new Float32Array(S1_N);
 const s1vy   = new Float32Array(S1_N);
-const s1spd  = new Float32Array(S1_N);  // individual speed multiplier (depth)
+const s1hx   = new Float32Array(S1_N);  // home x — keeps field always full
+const s1hy   = new Float32Array(S1_N);  // home y
 
-// Smoothed attractor — lags behind real mouse, creating natural trail
-let s1ax = 0, s1ay = 0;
-
-const S1_DAMP = 0.93;   // very high damping = thick underwater resistance
-const S1_F    = 0.055;  // weak attraction = slow to respond
+const S1_ATTR_R  = 130;               // attraction radius
+const S1_ATTR_R2 = S1_ATTR_R * S1_ATTR_R;
+const S1_F    = 4.5;   // attraction force toward mouse
+const S1_SP   = 0.012; // weak spring — slow return = underwater feel
+const S1_DAMP = 0.94;  // high damping = thick resistance
 
 function s1Init() {
-  s1ax = S / 2; s1ay = H / 2;
   for (let i = 0; i < S1_N; i++) {
-    s1x[i]   = Math.random() * S;
-    s1y[i]   = Math.random() * H;
-    s1vx[i]  = 0; s1vy[i] = 0;
-    s1spd[i] = 0.25 + Math.random() * 0.75; // slower particles trail further back
+    s1x[i]  = s1hx[i] = Math.random() * S;
+    s1y[i]  = s1hy[i] = Math.random() * H;
+    s1vx[i] = 0; s1vy[i] = 0;
   }
 }
 
 function s1Update() {
-  // Lag attractor drifts toward mouse slowly — creates the "behind" effect
-  if (mActive && mx < S) {
-    s1ax += (mx - s1ax) * 0.055;
-    s1ay += (my - s1ay) * 0.055;
-  }
-
+  const inS1 = mActive && mx < S;
   for (let i = 0; i < S1_N; i++) {
-    // Attract toward lagged mouse position
-    if (mActive) {
-      const dx = s1ax - s1x[i];
-      const dy = s1ay - s1y[i];
-      const d  = Math.sqrt(dx*dx + dy*dy) + 1;
-      // Stronger pull close-up, weak pull from afar — natural fluid gather
-      const f  = Math.min(S1_F * s1spd[i] * (1 + 60 / d), 1.2);
-      s1vx[i] += dx / d * f;
-      s1vy[i] += dy / d * f;
+    // Attract toward mouse (opposite of section 3 repulsion)
+    if (inS1) {
+      const dx = mx - s1x[i];
+      const dy = my - s1y[i];
+      const d2 = dx*dx + dy*dy;
+      if (d2 < S1_ATTR_R2 && d2 > 0.5) {
+        const d = Math.sqrt(d2);
+        const t = 1 - d / S1_ATTR_R;
+        s1vx[i] += dx / d * t * t * S1_F;
+        s1vy[i] += dy / d * t * t * S1_F;
+      }
     }
 
-    // Very weak center pull to keep particles from drifting off section
-    s1vx[i] += (S * 0.5 - s1x[i]) * 0.00018;
-    s1vy[i] += (H * 0.5 - s1y[i]) * 0.00018;
+    // Slow spring back to home — field stays spread
+    s1vx[i] += (s1hx[i] - s1x[i]) * S1_SP;
+    s1vy[i] += (s1hy[i] - s1y[i]) * S1_SP;
 
     // Heavy damping = underwater resistance
     s1vx[i] *= S1_DAMP; s1vy[i] *= S1_DAMP;
