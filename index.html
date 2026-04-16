@@ -6,40 +6,33 @@
 <title>Particle Effect</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-
   body {
-    background: #070b14;
+    background: #ffffff;
     overflow: hidden;
     width: 100vw;
     height: 100vh;
   }
-
-  canvas {
-    display: block;
-  }
-
+  canvas { display: block; }
   .hint {
     position: fixed;
-    bottom: 40px;
+    bottom: 36px;
     left: 50%;
     transform: translateX(-50%);
-    color: rgba(255,255,255,0.18);
+    color: rgba(0,0,0,0.18);
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-size: 13px;
-    letter-spacing: 2px;
+    font-size: 12px;
+    letter-spacing: 2.5px;
     text-transform: uppercase;
     pointer-events: none;
-    animation: fade 3s ease-in-out infinite alternate;
+    animation: fade 2.5s ease-in-out infinite alternate;
   }
-
   @keyframes fade {
-    from { opacity: 0.4; }
-    to   { opacity: 0.1; }
+    from { opacity: 0.5; }
+    to   { opacity: 0.12; }
   }
 </style>
 </head>
 <body>
-
 <canvas id="c"></canvas>
 <div class="hint">Move your mouse</div>
 
@@ -48,16 +41,14 @@ const canvas = document.getElementById('c');
 const ctx    = canvas.getContext('2d');
 
 let W, H, particles;
+const MOUSE   = { x: -9999, y: -9999 };
 
-const MOUSE       = { x: -9999, y: -9999 };
-const COUNT       = 160;
-const RADIUS      = 160;   // mouse influence zone
-const REPEL       = 7;     // push strength
-const SPRING      = 0.048; // return speed
-const DAMP        = 0.80;  // velocity damping
-
-// colour palette  blue → violet → cyan
-const HUES = [200, 215, 230, 250, 270, 190];
+// Tune these
+const COUNT   = 280;   // number of dots
+const RADIUS  = 120;   // mouse influence zone px
+const REPEL   = 5;     // push force
+const SPRING  = 0.042; // return speed
+const DAMP    = 0.78;  // velocity damping
 
 class Dot {
   constructor() { this.spawn(); }
@@ -69,14 +60,15 @@ class Dot {
     this.y  = this.oy;
     this.vx = 0;
     this.vy = 0;
-    this.r     = 1.5 + Math.random() * 2;
-    this.alpha = 0.25 + Math.random() * 0.45;
-    this.hue   = HUES[Math.floor(Math.random() * HUES.length)];
-    this.sat   = 70 + Math.random() * 25;
+    this.r     = 0.8 + Math.random() * 1.2;   // tiny dots
+    this.alpha = 0.25 + Math.random() * 0.35;
+    // dark grey to mid-grey
+    const l = 120 + Math.floor(Math.random() * 80);
+    this.color = `rgb(${l},${l},${l})`;
   }
 
   step() {
-    // spring towards home
+    // spring home
     this.vx += (this.ox - this.x) * SPRING;
     this.vy += (this.oy - this.y) * SPRING;
 
@@ -86,8 +78,8 @@ class Dot {
     const d  = Math.hypot(dx, dy);
     if (d < RADIUS && d > 1) {
       const f = (1 - d / RADIUS) * REPEL;
-      this.vx += (dx / d) * f * 2;
-      this.vy += (dy / d) * f * 2;
+      this.vx += (dx / d) * f * 2.2;
+      this.vy += (dy / d) * f * 2.2;
     }
 
     this.vx *= DAMP;
@@ -98,40 +90,30 @@ class Dot {
 
   draw() {
     const speed = Math.hypot(this.vx, this.vy);
-    const glow  = Math.min(speed / 4, 1);
-
-    const r = this.r + glow * 5;
-    const a = Math.min(this.alpha + glow * 0.5, 1);
-
-    if (glow > 0.05) {
-      const g = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, r * 3);
-      g.addColorStop(0, `hsla(${this.hue},${this.sat}%,75%,${a})`);
-      g.addColorStop(1, `hsla(${this.hue},${this.sat}%,75%,0)`);
-      ctx.fillStyle = g;
-    } else {
-      ctx.fillStyle = `hsla(${this.hue},${this.sat}%,68%,${a})`;
-    }
+    const glow  = Math.min(speed / 5, 1);
+    const r     = this.r + glow * 1.5;
+    const a     = Math.min(this.alpha + glow * 0.3, 0.9);
 
     ctx.beginPath();
     ctx.arc(this.x, this.y, r, 0, Math.PI * 2);
+    ctx.fillStyle = this.color.replace('rgb', 'rgba').replace(')', `,${a})`);
     ctx.fill();
   }
 }
 
 function drawLines() {
-  const MAX = 100;
+  const MAX = 80;
   for (let i = 0; i < particles.length; i++) {
     for (let j = i + 1; j < particles.length; j++) {
-      const d = Math.hypot(
-        particles[i].x - particles[j].x,
-        particles[i].y - particles[j].y
-      );
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      const d  = Math.hypot(dx, dy);
       if (d < MAX) {
         ctx.beginPath();
         ctx.moveTo(particles[i].x, particles[i].y);
         ctx.lineTo(particles[j].x, particles[j].y);
-        ctx.strokeStyle = `rgba(120,170,255,${(1 - d / MAX) * 0.1})`;
-        ctx.lineWidth = 0.7;
+        ctx.strokeStyle = `rgba(160,160,160,${(1 - d / MAX) * 0.18})`;
+        ctx.lineWidth = 0.5;
         ctx.stroke();
       }
     }
@@ -161,7 +143,6 @@ window.addEventListener('mouseleave', () => {
   MOUSE.x = -9999;
   MOUSE.y = -9999;
 });
-
 window.addEventListener('touchmove', e => {
   e.preventDefault();
   MOUSE.x = e.touches[0].clientX;
