@@ -1,152 +1,301 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Particles</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TimeClock 365 — Door Access + Time Tracking in One System</title>
+  <meta name="description" content="TimeClock 365 combines door access control and time tracking into one platform. Badge in — you're clocked in. No app. No terminal. No second step.">
   <style>
-    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #f8f8f8; }
-    canvas { display: block; width: 100vw; height: 100vh; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --blue: #3479E9;
+      --dark: #0d1117;
+      --light: #f8faff;
+      --muted: #555;
+      --border: #e2e8f0;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; color: #1a1a2e; background: #fff; line-height: 1.6; }
 
-    .center {
-      position: fixed;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      pointer-events: none;
+    /* NAV */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(255,255,255,0.97); backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 40px; height: 64px;
+    }
+    .logo { font-size: 1.25rem; font-weight: 700; color: var(--dark); text-decoration: none; }
+    .logo span { color: var(--blue); }
+    .nav-links { display: flex; gap: 32px; }
+    .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.95rem; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--blue); }
+    .nav-cta {
+      background: var(--blue); color: #fff; padding: 9px 20px; border-radius: 6px;
+      text-decoration: none; font-size: 0.9rem; font-weight: 600; transition: background 0.2s;
+    }
+    .nav-cta:hover { background: #2563cc; }
+
+    /* HERO */
+    .hero { background: var(--light); padding: 100px 40px 80px; text-align: center; }
+    .hero h1 {
+      font-size: clamp(2rem, 4vw, 3.2rem); font-weight: 800;
+      color: var(--dark); max-width: 800px; margin: 0 auto 24px; line-height: 1.2;
+    }
+    .hero p {
+      font-size: clamp(1rem, 2vw, 1.2rem); color: var(--muted);
+      max-width: 640px; margin: 0 auto 36px; line-height: 1.7;
+    }
+    .hero-cta {
+      display: inline-block; background: var(--blue); color: #fff;
+      padding: 16px 36px; border-radius: 8px; text-decoration: none;
+      font-size: 1.05rem; font-weight: 700; transition: background 0.2s;
+    }
+    .hero-cta:hover { background: #2563cc; }
+    .hero-note { margin-top: 14px; color: var(--muted); font-size: 0.88rem; }
+
+    /* TRUST STRIP */
+    .trust-strip {
+      background: #fff; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+      padding: 18px 40px; text-align: center;
+    }
+    .trust-strip p { color: var(--muted); font-size: 0.9rem; }
+    .trust-strip strong { color: var(--dark); }
+
+    /* DARK SECTION */
+    .dark-section { background: var(--dark); padding: 80px 40px; color: #fff; }
+    .section-label-blue { color: var(--blue); font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; text-align: center; }
+    .dark-section h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 800; margin-bottom: 48px; text-align: center; max-width: 700px; margin-left: auto; margin-right: auto; }
+    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; max-width: 900px; margin: 0 auto; text-align: center; }
+    .stat-num { font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; color: var(--blue); }
+    .stat-label { color: #aab; font-size: 0.95rem; margin-top: 8px; line-height: 1.5; }
+
+    /* SECTIONS */
+    section { padding: 80px 40px; }
+    .section-inner { max-width: 1100px; margin: 0 auto; }
+    .section-label { color: var(--blue); font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; }
+    h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 800; color: var(--dark); margin-bottom: 16px; }
+    .section-sub { color: var(--muted); font-size: 1rem; margin-bottom: 48px; max-width: 600px; }
+
+    /* CARDS */
+    .cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+    .card {
+      background: var(--light); border: 1px solid var(--border);
+      border-radius: 12px; padding: 32px; transition: box-shadow 0.2s;
+    }
+    .card:hover { box-shadow: 0 4px 24px rgba(52,121,233,0.10); }
+    .card-icon { font-size: 2rem; margin-bottom: 16px; }
+    .card h3 { font-size: 1.1rem; font-weight: 700; color: var(--dark); margin-bottom: 10px; }
+    .card p { color: var(--muted); font-size: 0.95rem; line-height: 1.6; }
+
+    /* HOW IT WORKS */
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+    .step { text-align: center; }
+    .step-num {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: var(--blue); color: #fff;
+      font-size: 1.5rem; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px;
+    }
+    .step h3 { font-size: 1.05rem; font-weight: 700; color: var(--dark); margin-bottom: 8px; }
+    .step p { color: var(--muted); font-size: 0.9rem; }
+
+    /* INDUSTRIES */
+    .industries-grid { display: flex; flex-wrap: wrap; gap: 12px; }
+    .industry-tag {
+      background: var(--light); border: 1px solid var(--border);
+      border-radius: 100px; padding: 8px 20px;
+      font-size: 0.9rem; color: var(--dark); font-weight: 500;
     }
 
-    @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200;300&display=swap');
-
-    .btn-click {
-      pointer-events: all;
-      font-family: 'Manrope', -apple-system, sans-serif;
-      font-size: 18px;
-      font-weight: 200;
-      letter-spacing: 8px;
-      text-transform: uppercase;
-      color: #1a1a1a;
-      text-decoration: none;
-      padding: 20px 60px;
-      border: 1px solid rgba(0,0,0,0.18);
-      border-radius: 100px;
-      background: rgba(255,255,255,0.22);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      transition: background 0.25s, transform 0.2s, letter-spacing 0.25s;
+    /* TESTIMONIAL */
+    .testimonial {
+      background: var(--light); border-left: 4px solid var(--blue);
+      border-radius: 0 12px 12px 0; padding: 32px 40px;
+      max-width: 700px; margin: 0 auto;
     }
+    .testimonial blockquote { font-size: 1.1rem; color: var(--dark); font-style: italic; line-height: 1.7; margin-bottom: 16px; }
+    .testimonial cite { color: var(--muted); font-size: 0.88rem; font-style: normal; }
 
-    .btn-click:hover {
-      background: rgba(255,255,255,0.42);
-      transform: scale(1.05);
-      letter-spacing: 12px;
+    /* CTA SECTION */
+    .cta-section { background: var(--blue); padding: 80px 40px; text-align: center; }
+    .cta-section h2 { color: #fff; margin-bottom: 12px; }
+    .cta-section p { color: rgba(255,255,255,0.82); font-size: 1rem; margin-bottom: 36px; max-width: 500px; margin-left: auto; margin-right: auto; }
+    .cta-btn-white {
+      display: inline-block; background: #fff; color: var(--blue);
+      padding: 16px 36px; border-radius: 8px; text-decoration: none;
+      font-size: 1.05rem; font-weight: 700; transition: opacity 0.2s;
+    }
+    .cta-btn-white:hover { opacity: 0.9; }
+
+    /* FOOTER */
+    footer { background: var(--dark); color: #aab; padding: 48px 40px; }
+    .footer-inner { max-width: 1100px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 40px; align-items: flex-start; justify-content: space-between; }
+    .footer-brand { font-size: 1.2rem; font-weight: 700; color: #fff; }
+    .footer-brand span { color: var(--blue); }
+    .footer-brand p { font-size: 0.85rem; color: #778; margin-top: 8px; font-weight: 400; }
+    .footer-links { display: flex; flex-wrap: wrap; gap: 16px; }
+    .footer-links a { color: #aab; text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+    .footer-links a:hover { color: #fff; }
+    .footer-copy { width: 100%; font-size: 0.82rem; color: #556; padding-top: 24px; border-top: 1px solid #1e2533; }
+
+    @media (max-width: 768px) {
+      nav { padding: 0 20px; }
+      .nav-links { display: none; }
+      .hero { padding: 60px 20px 50px; }
+      section { padding: 60px 20px; }
+      .dark-section { padding: 60px 20px; }
+      .stats-grid { grid-template-columns: 1fr; gap: 32px; }
+      .cards-grid { grid-template-columns: 1fr; }
+      .steps { grid-template-columns: 1fr; }
+      .cta-section { padding: 60px 20px; }
+      footer { padding: 40px 20px; }
+      .footer-inner { flex-direction: column; gap: 24px; }
+      .trust-strip { padding: 18px 20px; }
     }
   </style>
 </head>
 <body>
-<canvas id="canvas"></canvas>
 
-<div class="center">
-  <a href="effects/" class="btn-click">Click</a>
+<nav>
+  <a href="/timeclock365-landings/" class="logo">TimeClock <span>365</span></a>
+  <div class="nav-links">
+    <a href="/timeclock365-landings/door-access-control/">Door Access</a>
+    <a href="/timeclock365-landings/time-tracking/">Time Tracking</a>
+    <a href="/timeclock365-landings/pricing/">Pricing</a>
+    <a href="/timeclock365-landings/demo/">Demo</a>
+  </div>
+  <a href="/timeclock365-landings/demo/" class="nav-cta">Book a Demo</a>
+</nav>
+
+<div class="hero">
+  <h1>The Only System Where the Door IS the Time Clock</h1>
+  <p>TimeClock 365 combines door access control and time tracking into one platform. Badge in — you're clocked in. No app. No terminal. No second step.</p>
+  <a href="https://timeclock365.com/demo-page/" class="hero-cta">Book a 20-Minute Demo →</a>
+  <p class="hero-note">No credit card. No commitment. Live product walkthrough.</p>
 </div>
-<script>
-  const canvas = document.getElementById("canvas");
-  const ctx    = canvas.getContext("2d");
 
-  let W = canvas.width  = window.innerWidth;
-  let H = canvas.height = window.innerHeight;
+<div class="trust-strip">
+  <p><strong>Used by operations teams at</strong> &nbsp;Manufacturing &nbsp;·&nbsp; Engineering &nbsp;·&nbsp; Construction &nbsp;·&nbsp; Logistics &nbsp;·&nbsp; Healthcare</p>
+</div>
 
-  const N   = 30000;
-  const px  = new Float32Array(N);   // текущая x
-  const py  = new Float32Array(N);   // текущая y
-  const pvx = new Float32Array(N);   // скорость x
-  const pvy = new Float32Array(N);   // скорость y
-  const phx = new Float32Array(N);   // домашняя x (куда вернуться)
-  const phy = new Float32Array(N);   // домашняя y
+<div class="dark-section">
+  <div style="max-width:1100px;margin:0 auto;">
+    <p class="section-label-blue">The problem with two systems</p>
+    <h2 style="font-size:clamp(1.6rem,3vw,2.2rem);font-weight:800;margin-bottom:48px;text-align:center;max-width:700px;margin-left:auto;margin-right:auto;">Running time tracking and access control separately costs more than you think</h2>
+    <div class="stats-grid">
+      <div>
+        <div class="stat-num">$373M</div>
+        <div class="stat-label">Lost to buddy punching annually in the US</div>
+      </div>
+      <div>
+        <div class="stat-num">4.5 hrs</div>
+        <div class="stat-label">Per employee per month wasted on timesheet errors</div>
+      </div>
+      <div>
+        <div class="stat-num">2×</div>
+        <div class="stat-label">Vendor cost when access control and time tracking run separately</div>
+      </div>
+    </div>
+  </div>
+</div>
 
-  // Мышь
-  let mx = -9999, my = -9999, mActive = false;
+<section style="background:#fff;">
+  <div class="section-inner">
+    <p class="section-label">What's included</p>
+    <h2>Everything in one platform</h2>
+    <p class="section-sub">No integrations to maintain. No data to reconcile. One system for access and attendance.</p>
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-icon">🚪</div>
+        <h3>Door Access Control</h3>
+        <p>Cloud-based access control. RFID, NFC, biometric. Integrates with existing hardware. Manage remotely from any browser.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">⏱</div>
+        <h3>Time Tracking</h3>
+        <p>9 tracking methods: web portal, mobile, biometric clock, MS Teams, Slack, Chrome extension and more. All data in one dashboard.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">📊</div>
+        <h3>Compliance &amp; Reporting</h3>
+        <p>Tamper-evident logs. GDPR aligned. ISO 27001. Audit-ready in seconds. Export payroll without touching a spreadsheet.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-  window.addEventListener("mousemove", e => { mx = e.clientX; my = e.clientY; mActive = true; });
-  window.addEventListener("mouseleave", () => { mActive = false; });
-  window.addEventListener("touchmove", e => {
-    e.preventDefault();
-    mx = e.touches[0].clientX; my = e.touches[0].clientY; mActive = true;
-  }, { passive: false });
-  window.addEventListener("touchend", () => { mActive = false; });
-  window.addEventListener("resize", () => {
-    W = canvas.width  = window.innerWidth;
-    H = canvas.height = window.innerHeight;
-    init();
-  });
+<section style="background:var(--light);">
+  <div class="section-inner">
+    <p class="section-label">How it works</p>
+    <h2>Three steps. That's it.</h2>
+    <p class="section-sub">The entire workflow from door entry to payroll export — automated.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h3>Employee badges in</h3>
+        <p>RFID card, phone tap, or fingerprint. Any supported credential at the door.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h3>Auto clock-in recorded</h3>
+        <p>Door entry is instantly logged as a time record. No second action required from anyone.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h3>Payroll runs clean</h3>
+        <p>HR exports accurate hours with one click. No disputes. No manual corrections.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-  function init() {
-    for (let i = 0; i < N; i++) {
-      phx[i] = Math.random() * W;
-      phy[i] = Math.random() * H;
-      px[i]  = phx[i];
-      py[i]  = phy[i];
-      pvx[i] = 0;
-      pvy[i] = 0;
-    }
-  }
+<section style="background:#fff;">
+  <div class="section-inner">
+    <p class="section-label">Industries</p>
+    <h2>Built for teams that operate in the real world</h2>
+    <p class="section-sub">If your employees badge through a door, TimeClock 365 works for you.</p>
+    <div class="industries-grid">
+      <span class="industry-tag">🏭 Manufacturing</span>
+      <span class="industry-tag">⚙️ Engineering</span>
+      <span class="industry-tag">🏗 Construction</span>
+      <span class="industry-tag">🏥 Healthcare</span>
+      <span class="industry-tag">🚛 Logistics</span>
+      <span class="industry-tag">🏦 Finance</span>
+    </div>
+  </div>
+</section>
 
-  // ── Физика ──────────────────────────────────────────────────────────────────
-  const REPEL_R  = 90;
-  const REPEL_R2 = REPEL_R * REPEL_R;
-  const REPEL_F  = 5;     // сила отталкивания — не слишком сильная
-  const SPRING   = 0.018; // слабая пружина — нет перелёта
-  const DAMP     = 0.96;  // высокое затухание — нет осцилляции
-  const MAX_V    = 10;    // ограничение скорости
+<section style="background:var(--light);">
+  <div class="section-inner" style="text-align:center;">
+    <p class="section-label">From the field</p>
+    <div class="testimonial">
+      <blockquote>"We were running two separate systems — one for door access, one for timesheets. The data never matched. We switched to TimeClock 365 and timesheet disputes dropped 80% in 90 days."</blockquote>
+      <cite>— HR Director, 200-person manufacturing company</cite>
+    </div>
+  </div>
+</section>
 
-  function animate() {
-    requestAnimationFrame(animate);
-    ctx.clearRect(0, 0, W, H);
-    ctx.fillStyle = "rgba(20,20,20,0.85)";
+<div class="cta-section">
+  <h2>See it live in 20 minutes</h2>
+  <p>No sales pitch. No commitment. We'll show you the product using a setup similar to yours.</p>
+  <a href="https://timeclock365.com/demo-page/" class="cta-btn-white">Book a 20-Minute Demo →</a>
+</div>
 
-    for (let i = 0; i < N; i++) {
-      // 1. Мышка отталкивает
-      if (mActive) {
-        const dx = px[i] - mx;
-        const dy = py[i] - my;
-        const d2 = dx * dx + dy * dy;
-        if (d2 < REPEL_R2 && d2 > 0.5) {
-          const d  = Math.sqrt(d2);
-          const t  = 1 - d / REPEL_R;     // 0..1 — сильнее у центра
-          const f  = t * t * REPEL_F;
-          pvx[i] += (dx / d) * f;         // вектор ОТ мышки
-          pvy[i] += (dy / d) * f;
-        }
-      }
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">TimeClock <span>365</span><p>Time Tracking + Door Access Control in One System</p></div>
+    <div class="footer-links">
+      <a href="/timeclock365-landings/door-access-control/">Door Access Control</a>
+      <a href="/timeclock365-landings/time-tracking/">Time Tracking</a>
+      <a href="/timeclock365-landings/pricing/">Pricing</a>
+      <a href="/timeclock365-landings/demo/">Book a Demo</a>
+      <a href="https://timeclock365.com">timeclock365.com</a>
+    </div>
+    <p class="footer-copy">© 2026 TimeClock 365. GDPR Aligned · ISO 27001</p>
+  </div>
+</footer>
 
-      // 2. Пружина тянет домой — слабо, без перелёта
-      pvx[i] += (phx[i] - px[i]) * SPRING;
-      pvy[i] += (phy[i] - py[i]) * SPRING;
-
-      // 3. Затухание — гасит скорость, нет осцилляции
-      pvx[i] *= DAMP;
-      pvy[i] *= DAMP;
-
-      // 4. Ограничение скорости — частицы не улетают
-      const spd = pvx[i] * pvx[i] + pvy[i] * pvy[i];
-      if (spd > MAX_V * MAX_V) {
-        const s  = MAX_V / Math.sqrt(spd);
-        pvx[i] *= s;
-        pvy[i] *= s;
-      }
-
-      // 5. Позиция
-      px[i] += pvx[i];
-      py[i] += pvy[i];
-
-      // 6. Рисуем точку
-      ctx.fillRect(px[i] | 0, py[i] | 0, 1, 1);
-    }
-  }
-
-  init();
-  animate();
-</script>
 </body>
 </html>
