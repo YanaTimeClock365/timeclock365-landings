@@ -30,8 +30,8 @@
 
     /* NAV */
     nav { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.96); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 48px; height: 68px; }
-    .logo { font-size: 1.2rem; font-weight: 800; color: var(--dark); text-decoration: none; letter-spacing: -0.02em; }
-    .logo span { color: var(--blue); }
+    .logo { text-decoration: none; display: flex; align-items: center; }
+    .logo img { height: 40px; width: auto; display: block; }
     .nav-links { display: flex; gap: 36px; align-items: center; }
     .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: color 0.15s; }
     .nav-links a:hover, .nav-links a.active { color: var(--dark); }
@@ -136,7 +136,7 @@
 <body>
 
 <nav>
-  <a href="https://yanatimeclock365.github.io/timeclock365-landings/" class="logo">TimeClock <span>365</span></a>
+  <a href="https://yanatimeclock365.github.io/timeclock365-landings/" class="logo"><img src="/timeclock365-landings/images/logo.svg" alt="TimeClock 365"></a>
   <div class="nav-links">
     <a href="https://yanatimeclock365.github.io/timeclock365-landings/door-access-control/">Door Access</a>
     <a href="https://yanatimeclock365.github.io/timeclock365-landings/time-tracking/">Time Tracking</a>

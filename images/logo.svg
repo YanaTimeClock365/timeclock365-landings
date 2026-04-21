@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 52" width="220" height="52">
+  <!-- Clock icon -->
+  <!-- Outer blue ring -->
+  <circle cx="26" cy="26" r="24" fill="none" stroke="#1E9CD7" stroke-width="3.5"/>
+  <!-- Orange arc bottom-right half -->
+  <path d="M26 26 L26 4 A22 22 0 0 1 48 26 Z" fill="#F5A623" opacity="0.15"/>
+  <path d="M26 2 A24 24 0 0 1 50 26" fill="none" stroke="#F5A623" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- Inner circle -->
+  <circle cx="26" cy="26" r="16" fill="#EFF8FD"/>
+  <!-- Clock face details -->
+  <!-- 12 o'clock tick -->
+  <line x1="26" y1="12" x2="26" y2="15" stroke="#1E9CD7" stroke-width="2" stroke-linecap="round"/>
+  <!-- 3 o'clock tick -->
+  <line x1="40" y1="26" x2="37" y2="26" stroke="#1E9CD7" stroke-width="2" stroke-linecap="round"/>
+  <!-- 6 o'clock tick -->
+  <line x1="26" y1="40" x2="26" y2="37" stroke="#1E9CD7" stroke-width="2" stroke-linecap="round"/>
+  <!-- 9 o'clock tick -->
+  <line x1="12" y1="26" x2="15" y2="26" stroke="#1E9CD7" stroke-width="2" stroke-linecap="round"/>
+  <!-- Hour hand (pointing to ~10 o'clock) -->
+  <line x1="26" y1="26" x2="19" y2="19" stroke="#1C3F6B" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Minute hand (pointing to 12) -->
+  <line x1="26" y1="26" x2="26" y2="14" stroke="#E84B0C" stroke-width="2" stroke-linecap="round"/>
+  <!-- Center dot -->
+  <circle cx="26" cy="26" r="2.5" fill="#1C3F6B"/>
+
+  <!-- Text: TimeClock 365 -->
+  <text x="60" y="20" font-family="Inter, -apple-system, sans-serif" font-weight="700" font-size="16" fill="#E84B0C" letter-spacing="-0.3">TimeClock</text>
+  <text x="60" y="40" font-family="Inter, -apple-system, sans-serif" font-weight="800" font-size="18" fill="#E84B0C" letter-spacing="-0.5">365</text>
+</svg>
