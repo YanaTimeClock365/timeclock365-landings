@@ -4,142 +4,162 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pricing — TimeClock 365</title>
-  <meta name="description" content="Simple pricing for TimeClock 365. Start free for 14 days. No credit card required. Time tracking + door access control in one system.">
+  <meta name="description" content="Simple pricing for TimeClock 365. Time tracking from $4.17/user/mo. Add door access control from $2.50/user/mo. Free 14-day trial. No credit card required.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root { --blue: #3479E9; --dark: #0d1117; --light: #f8faff; --muted: #555; --border: #e2e8f0; }
+    :root {
+      --blue: #2563EB;
+      --blue-dark: #1d4ed8;
+      --blue-light: #EFF6FF;
+      --dark: #111827;
+      --dark2: #1f2937;
+      --body: #374151;
+      --muted: #6b7280;
+      --light: #f9fafb;
+      --border: #e5e7eb;
+      --white: #ffffff;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+    }
     html { scroll-behavior: smooth; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; color: #1a1a2e; background: #fff; line-height: 1.6; }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; color: var(--body); background: var(--white); line-height: 1.6; -webkit-font-smoothing: antialiased; }
 
-    nav { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.97); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 40px; height: 64px; }
-    .logo { font-size: 1.25rem; font-weight: 700; color: var(--dark); text-decoration: none; }
+    /* NAV */
+    nav { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.96); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 48px; height: 68px; }
+    .logo { font-size: 1.2rem; font-weight: 800; color: var(--dark); text-decoration: none; letter-spacing: -0.02em; }
     .logo span { color: var(--blue); }
-    .nav-links { display: flex; gap: 32px; }
-    .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.95rem; transition: color 0.2s; }
-    .nav-links a:hover, .nav-links a.active { color: var(--blue); }
-    .nav-cta { background: var(--blue); color: #fff; padding: 9px 20px; border-radius: 6px; text-decoration: none; font-size: 0.9rem; font-weight: 600; transition: background 0.2s; }
-    .nav-cta:hover { background: #2563cc; }
+    .nav-links { display: flex; gap: 36px; align-items: center; }
+    .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: color 0.15s; }
+    .nav-links a:hover, .nav-links a.active { color: var(--dark); }
+    .nav-cta { background: var(--blue); color: #fff; padding: 9px 22px; border-radius: var(--radius-sm); text-decoration: none; font-size: 0.875rem; font-weight: 600; transition: background 0.15s; white-space: nowrap; }
+    .nav-cta:hover { background: var(--blue-dark); }
 
-    .hero { background: var(--light); padding: 80px 40px 60px; text-align: center; }
-    .hero h1 { font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; color: var(--dark); max-width: 600px; margin: 0 auto 20px; line-height: 1.2; }
-    .hero p { font-size: 1.15rem; color: var(--muted); margin-bottom: 0; }
+    /* HERO */
+    .hero { background: linear-gradient(180deg, #EFF6FF 0%, #ffffff 100%); padding: 80px 48px 64px; text-align: center; }
+    .hero h1 { font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; color: var(--dark); max-width: 620px; margin: 0 auto 18px; line-height: 1.15; letter-spacing: -0.03em; }
+    .hero p { font-size: 1.1rem; color: var(--muted); margin-bottom: 0; line-height: 1.7; }
 
-    section { padding: 80px 40px; }
+    /* SECTIONS */
+    section { padding: 80px 48px; }
     .section-inner { max-width: 1100px; margin: 0 auto; }
-    .section-label { color: var(--blue); font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; }
-    h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 800; color: var(--dark); margin-bottom: 16px; }
-    .section-sub { color: var(--muted); font-size: 1rem; margin-bottom: 48px; max-width: 600px; }
+    .section-label { color: var(--blue); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; }
+    h2 { font-size: clamp(1.7rem, 3vw, 2.25rem); font-weight: 800; color: var(--dark); margin-bottom: 16px; letter-spacing: -0.025em; line-height: 1.25; }
+    .section-sub { color: var(--muted); font-size: 1rem; margin-bottom: 52px; max-width: 580px; line-height: 1.7; }
 
     /* PRICING CARDS */
     .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; align-items: stretch; }
-    .pricing-card { border: 1px solid var(--border); border-radius: 16px; padding: 36px 32px; display: flex; flex-direction: column; position: relative; background: #fff; }
-    .pricing-card.popular { border-color: var(--blue); border-width: 2px; box-shadow: 0 8px 32px rgba(52,121,233,0.14); }
-    .popular-badge {
-      position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
-      background: var(--blue); color: #fff; font-size: 0.75rem; font-weight: 700;
-      letter-spacing: 0.06em; text-transform: uppercase; padding: 4px 16px; border-radius: 100px;
-    }
-    .plan-name { font-size: 0.85rem; font-weight: 700; color: var(--blue); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 12px; }
-    .plan-price { font-size: 2rem; font-weight: 800; color: var(--dark); margin-bottom: 4px; }
-    .plan-price span { font-size: 1rem; font-weight: 500; color: var(--muted); }
-    .plan-desc { color: var(--muted); font-size: 0.9rem; margin-bottom: 28px; padding-bottom: 28px; border-bottom: 1px solid var(--border); }
-    .plan-features { list-style: none; flex: 1; margin-bottom: 32px; }
-    .plan-features li { padding: 8px 0; font-size: 0.92rem; color: var(--dark); display: flex; align-items: flex-start; gap: 10px; }
+    .pricing-card { border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 36px 32px; display: flex; flex-direction: column; position: relative; background: var(--white); }
+    .pricing-card.popular { border-color: var(--blue); border-width: 2px; box-shadow: 0 8px 40px rgba(37,99,235,0.15); }
+    .popular-badge { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: var(--blue); color: #fff; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 4px 18px; border-radius: 100px; white-space: nowrap; }
+    .plan-name { font-size: 0.8rem; font-weight: 700; color: var(--blue); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 14px; }
+    .plan-price { font-size: 2.1rem; font-weight: 800; color: var(--dark); margin-bottom: 4px; letter-spacing: -0.03em; line-height: 1.1; }
+    .plan-price span { font-size: 0.95rem; font-weight: 500; color: var(--muted); }
+    .plan-price-sub { font-size: 0.8rem; color: var(--muted); margin-bottom: 20px; }
+    .plan-desc { color: var(--muted); font-size: 0.88rem; line-height: 1.65; margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+    .plan-features { list-style: none; flex: 1; margin-bottom: 28px; }
+    .plan-features li { padding: 7px 0; font-size: 0.9rem; color: var(--dark); display: flex; align-items: flex-start; gap: 10px; line-height: 1.45; }
     .plan-features li::before { content: '✓'; color: var(--blue); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
     .plan-features li.na { color: var(--muted); }
-    .plan-features li.na::before { content: '–'; color: #ccc; }
-    .plan-cta { display: block; text-align: center; padding: 13px 24px; border-radius: 8px; font-weight: 700; font-size: 0.95rem; text-decoration: none; transition: all 0.2s; }
+    .plan-features li.na::before { content: '–'; color: #d1d5db; }
+    .plan-cta { display: block; text-align: center; padding: 13px 24px; border-radius: var(--radius-md); font-weight: 700; font-size: 0.9rem; text-decoration: none; transition: all 0.15s; }
     .plan-cta-primary { background: var(--blue); color: #fff; }
-    .plan-cta-primary:hover { background: #2563cc; }
-    .plan-cta-outline { border: 2px solid var(--border); color: var(--dark); }
+    .plan-cta-primary:hover { background: var(--blue-dark); }
+    .plan-cta-outline { border: 1.5px solid var(--border); color: var(--dark2); }
     .plan-cta-outline:hover { border-color: var(--blue); color: var(--blue); }
     .plan-cta-dark { background: var(--dark); color: #fff; }
-    .plan-cta-dark:hover { background: #1e2533; }
+    .plan-cta-dark:hover { background: var(--dark2); }
 
     /* COMPARISON TABLE */
-    .compare-table { width: 100%; border-collapse: collapse; font-size: 0.93rem; }
-    .compare-table th { background: var(--light); padding: 14px 20px; text-align: left; font-weight: 700; color: var(--dark); border-bottom: 2px solid var(--border); }
+    .compare-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    .compare-table th { background: var(--light); padding: 14px 20px; text-align: left; font-weight: 700; color: var(--dark); border-bottom: 2px solid var(--border); font-size: 0.88rem; }
     .compare-table th:not(:first-child) { text-align: center; }
     .compare-table td { padding: 14px 20px; border-bottom: 1px solid var(--border); color: var(--dark); }
     .compare-table td:not(:first-child) { text-align: center; }
     .compare-table tr:last-child td { border-bottom: none; }
     .compare-table tr:hover td { background: var(--light); }
-    .check { color: var(--blue); font-weight: 700; font-size: 1.1rem; }
-    .dash { color: #ccc; font-size: 1.1rem; }
-    .col-highlight { background: rgba(52,121,233,0.04); }
+    .check { color: var(--blue); font-weight: 700; font-size: 1.05rem; }
+    .dash { color: #d1d5db; font-size: 1.05rem; }
+    .col-highlight { background: rgba(37,99,235,0.04); }
 
     /* ROI CALLOUT */
-    .roi-callout { background: var(--dark); border-radius: 16px; padding: 48px; color: #fff; text-align: center; max-width: 800px; margin: 0 auto; }
-    .roi-callout h3 { font-size: 1.5rem; font-weight: 800; margin-bottom: 16px; }
-    .roi-callout p { color: #aab; font-size: 1rem; line-height: 1.7; max-width: 580px; margin: 0 auto; }
+    .roi-callout { background: var(--dark); border-radius: var(--radius-lg); padding: 52px; color: #fff; text-align: center; max-width: 780px; margin: 0 auto; }
+    .roi-callout h3 { font-size: 1.5rem; font-weight: 800; margin-bottom: 16px; letter-spacing: -0.02em; line-height: 1.3; }
+    .roi-callout p { color: #9ca3af; font-size: 1rem; line-height: 1.75; max-width: 560px; margin: 0 auto; }
 
     /* FAQ */
-    .faq { max-width: 700px; margin: 0 auto; }
-    .faq-item { border-bottom: 1px solid var(--border); padding: 20px 0; }
+    .faq { max-width: 680px; margin: 0 auto; }
+    .faq-item { border-bottom: 1px solid var(--border); padding: 22px 0; }
     .faq-item:last-child { border-bottom: none; }
-    .faq-q { font-weight: 700; color: var(--dark); font-size: 1rem; margin-bottom: 8px; }
-    .faq-a { color: var(--muted); font-size: 0.95rem; line-height: 1.6; }
+    .faq-q { font-weight: 700; color: var(--dark); font-size: 1rem; margin-bottom: 8px; letter-spacing: -0.01em; }
+    .faq-a { color: var(--muted); font-size: 0.925rem; line-height: 1.65; }
 
-    .cta-section { background: var(--blue); padding: 80px 40px; text-align: center; }
-    .cta-section h2 { color: #fff; margin-bottom: 12px; }
-    .cta-section p { color: rgba(255,255,255,0.82); font-size: 1rem; margin-bottom: 36px; max-width: 500px; margin-left: auto; margin-right: auto; }
+    /* CTA */
+    .cta-section { background: var(--blue); padding: 88px 48px; text-align: center; }
+    .cta-section h2 { color: #fff; margin-bottom: 14px; letter-spacing: -0.02em; }
+    .cta-section p { color: rgba(255,255,255,0.8); font-size: 1rem; margin-bottom: 40px; max-width: 500px; margin-left: auto; margin-right: auto; line-height: 1.7; }
     .cta-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
-    .cta-btn-white { display: inline-block; background: #fff; color: var(--blue); padding: 15px 32px; border-radius: 8px; text-decoration: none; font-size: 0.98rem; font-weight: 700; transition: opacity 0.2s; }
-    .cta-btn-white:hover { opacity: 0.9; }
-    .cta-btn-outline { display: inline-block; border: 2px solid rgba(255,255,255,0.5); color: #fff; padding: 15px 32px; border-radius: 8px; text-decoration: none; font-size: 0.98rem; font-weight: 700; transition: border-color 0.2s; }
-    .cta-btn-outline:hover { border-color: #fff; }
+    .cta-btn-white { display: inline-block; background: #fff; color: var(--blue); padding: 15px 36px; border-radius: var(--radius-md); text-decoration: none; font-size: 0.95rem; font-weight: 700; transition: opacity 0.15s, transform 0.15s; box-shadow: 0 4px 14px rgba(0,0,0,0.15); }
+    .cta-btn-white:hover { opacity: 0.95; transform: translateY(-1px); }
+    .cta-btn-outline { display: inline-block; border: 2px solid rgba(255,255,255,0.45); color: #fff; padding: 15px 36px; border-radius: var(--radius-md); text-decoration: none; font-size: 0.95rem; font-weight: 700; transition: border-color 0.15s; }
+    .cta-btn-outline:hover { border-color: rgba(255,255,255,0.85); }
 
-    footer { background: var(--dark); color: #aab; padding: 48px 40px; }
+    /* FOOTER */
+    footer { background: var(--dark); color: #9ca3af; padding: 56px 48px; }
     .footer-inner { max-width: 1100px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 40px; align-items: flex-start; justify-content: space-between; }
-    .footer-brand { font-size: 1.2rem; font-weight: 700; color: #fff; }
-    .footer-brand span { color: var(--blue); }
-    .footer-brand p { font-size: 0.85rem; color: #778; margin-top: 8px; font-weight: 400; }
-    .footer-links { display: flex; flex-wrap: wrap; gap: 16px; }
-    .footer-links a { color: #aab; text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+    .footer-brand { font-size: 1.15rem; font-weight: 800; color: #fff; letter-spacing: -0.02em; }
+    .footer-brand span { color: #60a5fa; }
+    .footer-brand p { font-size: 0.85rem; color: #6b7280; margin-top: 8px; font-weight: 400; max-width: 260px; line-height: 1.6; }
+    .footer-links { display: flex; flex-wrap: wrap; gap: 14px; }
+    .footer-links a { color: #9ca3af; text-decoration: none; font-size: 0.875rem; font-weight: 500; transition: color 0.15s; }
     .footer-links a:hover { color: #fff; }
-    .footer-copy { width: 100%; font-size: 0.82rem; color: #556; padding-top: 24px; border-top: 1px solid #1e2533; }
+    .footer-copy { width: 100%; font-size: 0.8rem; color: #4b5563; padding-top: 28px; border-top: 1px solid #1f2937; margin-top: 8px; }
 
-    @media (max-width: 768px) {
-      nav { padding: 0 20px; }
+    @media (max-width: 900px) {
+      nav { padding: 0 24px; }
       .nav-links { display: none; }
-      .hero { padding: 60px 20px 40px; }
-      section { padding: 60px 20px; }
+      .hero { padding: 60px 24px 48px; }
+      section { padding: 60px 24px; }
       .pricing-grid { grid-template-columns: 1fr; }
-      .compare-table { font-size: 0.82rem; }
+      .compare-table { font-size: 0.8rem; }
       .compare-table th, .compare-table td { padding: 10px 12px; }
-      .cta-section { padding: 60px 20px; }
-      footer { padding: 40px 20px; }
-      .footer-inner { flex-direction: column; gap: 24px; }
-      .roi-callout { padding: 32px 24px; }
+      .cta-section { padding: 64px 24px; }
+      footer { padding: 48px 24px; }
+      .footer-inner { flex-direction: column; gap: 28px; }
+      .roi-callout { padding: 36px 24px; }
     }
   </style>
 </head>
 <body>
 
 <nav>
-  <a href="/timeclock365-landings/" class="logo">TimeClock <span>365</span></a>
+  <a href="https://yanatimeclock365.github.io/timeclock365-landings/" class="logo">TimeClock <span>365</span></a>
   <div class="nav-links">
-    <a href="/timeclock365-landings/door-access-control/">Door Access</a>
-    <a href="/timeclock365-landings/time-tracking/">Time Tracking</a>
-    <a href="/timeclock365-landings/pricing/" class="active">Pricing</a>
-    <a href="/timeclock365-landings/demo/">Demo</a>
+    <a href="https://yanatimeclock365.github.io/timeclock365-landings/door-access-control/">Door Access</a>
+    <a href="https://yanatimeclock365.github.io/timeclock365-landings/time-tracking/">Time Tracking</a>
+    <a href="https://yanatimeclock365.github.io/timeclock365-landings/pricing/" class="active">Pricing</a>
+    <a href="https://yanatimeclock365.github.io/timeclock365-landings/demo/">Demo</a>
   </div>
-  <a href="/timeclock365-landings/demo/" class="nav-cta">Book a Demo</a>
+  <a href="https://bookings.cloud.microsoft/book/TimeClock365FreeDemoCall@softsale.co.il/?ismsaljsauthenabled=true" class="nav-cta" target="_blank" rel="noopener">Book a Demo</a>
 </nav>
 
 <div class="hero">
   <h1>Simple Pricing. No Surprises.</h1>
-  <p>Start free for 14 days. No credit card required.</p>
+  <p>Start free for 14 days. No credit card required. Cancel anytime.</p>
 </div>
 
-<section style="background:#fff;">
+<section style="background:var(--white);">
   <div class="section-inner">
     <div class="pricing-grid">
 
       <!-- STARTER -->
       <div class="pricing-card">
-        <div class="plan-name">Starter</div>
-        <div class="plan-price">From $X <span>/ user / month</span></div>
+        <div class="plan-name">Attendance Pro</div>
+        <div class="plan-price">$4.17 <span>/ user / mo</span></div>
+        <div class="plan-price-sub">billed yearly · $5.00/mo billed monthly</div>
         <p class="plan-desc">Time tracking for teams who want a clean, reliable system — web, mobile, and integrations included.</p>
         <ul class="plan-features">
           <li>Web portal clock-in</li>
@@ -154,18 +174,19 @@
           <li class="na">Biometric clock terminal</li>
           <li class="na">SSO / SAML</li>
         </ul>
-        <a href="https://timeclock365.com/demo-page/" class="plan-cta plan-cta-outline">Start Free Trial →</a>
+        <a href="https://bookings.cloud.microsoft/book/TimeClock365FreeDemoCall@softsale.co.il/?ismsaljsauthenabled=true" class="plan-cta plan-cta-outline" target="_blank" rel="noopener">Start Free Trial →</a>
       </div>
 
       <!-- PROFESSIONAL -->
       <div class="pricing-card popular">
         <div class="popular-badge">Most Popular</div>
-        <div class="plan-name">Professional</div>
-        <div class="plan-price">From $X <span>/ user / month</span></div>
-        <p class="plan-desc">Everything in Starter plus door access control. One badge — clocked in. The complete system.</p>
+        <div class="plan-name">Attendance Pro + Door Access</div>
+        <div class="plan-price">$5.00 <span>/ user / mo</span></div>
+        <div class="plan-price-sub">billed yearly · $6.00/mo billed monthly</div>
+        <p class="plan-desc">Everything in Attendance Pro plus door access control. One badge — clocked in. The complete system.</p>
         <ul class="plan-features">
-          <li>Everything in Starter</li>
-          <li>Door access control</li>
+          <li>Everything in Attendance Pro</li>
+          <li>Door access control ($2.50/user/mo add-on)</li>
           <li>Badge-in = clock-in automation</li>
           <li>Biometric clock terminal</li>
           <li>RFID, NFC &amp; fingerprint support</li>
@@ -176,16 +197,17 @@
           <li>Multi-site management</li>
           <li class="na">SSO / SAML</li>
         </ul>
-        <a href="https://timeclock365.com/demo-page/" class="plan-cta plan-cta-primary">Start Free Trial →</a>
+        <a href="https://bookings.cloud.microsoft/book/TimeClock365FreeDemoCall@softsale.co.il/?ismsaljsauthenabled=true" class="plan-cta plan-cta-primary" target="_blank" rel="noopener">Start Free Trial →</a>
       </div>
 
       <!-- ENTERPRISE -->
       <div class="pricing-card">
         <div class="plan-name">Enterprise</div>
-        <div class="plan-price">Contact Sales</div>
+        <div class="plan-price">Custom</div>
+        <div class="plan-price-sub">volume pricing available</div>
         <p class="plan-desc">Custom setup for large or complex deployments. SSO, SAML, dedicated support, and SLA guarantees.</p>
         <ul class="plan-features">
-          <li>Everything in Professional</li>
+          <li>Everything in Attendance Pro + Door Access</li>
           <li>SSO / SAML</li>
           <li>Custom integrations</li>
           <li>Dedicated account manager</li>
@@ -197,7 +219,7 @@
           <li>Volume pricing</li>
           <li>Hardware procurement help</li>
         </ul>
-        <a href="https://timeclock365.com/demo-page/" class="plan-cta plan-cta-dark">Talk to Sales →</a>
+        <a href="https://bookings.cloud.microsoft/book/TimeClock365FreeDemoCall@softsale.co.il/?ismsaljsauthenabled=true" class="plan-cta plan-cta-dark" target="_blank" rel="noopener">Talk to Sales →</a>
       </div>
 
     </div>
@@ -214,14 +236,26 @@
         <thead>
           <tr>
             <th>Feature</th>
-            <th>Starter</th>
-            <th class="col-highlight">Professional</th>
+            <th>Attendance Pro</th>
+            <th class="col-highlight">Pro + Door Access</th>
             <th>Enterprise</th>
           </tr>
         </thead>
         <tbody>
           <tr>
             <td>Time tracking (web &amp; mobile)</td>
+            <td><span class="check">✓</span></td>
+            <td class="col-highlight"><span class="check">✓</span></td>
+            <td><span class="check">✓</span></td>
+          </tr>
+          <tr>
+            <td>Microsoft Teams &amp; Slack</td>
+            <td><span class="check">✓</span></td>
+            <td class="col-highlight"><span class="check">✓</span></td>
+            <td><span class="check">✓</span></td>
+          </tr>
+          <tr>
+            <td>GPS field tracking</td>
             <td><span class="check">✓</span></td>
             <td class="col-highlight"><span class="check">✓</span></td>
             <td><span class="check">✓</span></td>
@@ -235,12 +269,6 @@
           <tr>
             <td>Biometric clock terminal</td>
             <td><span class="dash">–</span></td>
-            <td class="col-highlight"><span class="check">✓</span></td>
-            <td><span class="check">✓</span></td>
-          </tr>
-          <tr>
-            <td>Microsoft Teams &amp; Slack</td>
-            <td><span class="check">✓</span></td>
             <td class="col-highlight"><span class="check">✓</span></td>
             <td><span class="check">✓</span></td>
           </tr>
@@ -263,7 +291,7 @@
             <td><span class="check">✓</span></td>
           </tr>
           <tr>
-            <td>Dedicated support</td>
+            <td>Dedicated support + SLA</td>
             <td><span class="dash">–</span></td>
             <td class="col-highlight"><span class="dash">–</span></td>
             <td><span class="check">✓</span></td>
@@ -275,7 +303,7 @@
 </section>
 
 <!-- ROI CALLOUT -->
-<section style="background:#fff;">
+<section style="background:var(--white);">
   <div class="section-inner">
     <div class="roi-callout">
       <h3>Most companies recover the subscription cost within 60 days</h3>
@@ -299,12 +327,16 @@
         <p class="faq-a">A user is any employee with an active account in the system — whether they clock in by badge, app, web portal, or any other method. You only pay for active users.</p>
       </div>
       <div class="faq-item">
-        <p class="faq-q">Can I mix plans across locations?</p>
-        <p class="faq-a">Enterprise plans support custom setups for multi-location deployments. Contact sales to discuss what works for your structure.</p>
+        <p class="faq-q">Can I add door access control to an existing plan?</p>
+        <p class="faq-a">Yes. Door Access Control is available as an add-on at $2.50/user/month (yearly) or $3.00/user/month (monthly). It integrates directly with your existing time tracking data.</p>
       </div>
       <div class="faq-item">
         <p class="faq-q">Does the hardware cost extra?</p>
         <p class="faq-a">Hardware (door readers, biometric terminals) is separate from the software subscription. In many cases you can use existing hardware. We'll confirm compatibility during your demo.</p>
+      </div>
+      <div class="faq-item">
+        <p class="faq-q">Can I mix plans across locations?</p>
+        <p class="faq-a">Enterprise plans support custom setups for multi-location deployments. Contact sales to discuss what works for your structure.</p>
       </div>
     </div>
   </div>
@@ -314,20 +346,23 @@
   <h2>Ready to get started?</h2>
   <p>14-day free trial. No credit card. Cancel anytime.</p>
   <div class="cta-buttons">
-    <a href="https://timeclock365.com/demo-page/" class="cta-btn-white">Start 14-Day Free Trial</a>
-    <a href="https://timeclock365.com/demo-page/" class="cta-btn-outline">Talk to Sales</a>
+    <a href="https://bookings.cloud.microsoft/book/TimeClock365FreeDemoCall@softsale.co.il/?ismsaljsauthenabled=true" class="cta-btn-white" target="_blank" rel="noopener">Book a Free Demo Call</a>
+    <a href="https://bookings.cloud.microsoft/book/TimeClock365FreeDemoCall@softsale.co.il/?ismsaljsauthenabled=true" class="cta-btn-outline" target="_blank" rel="noopener">Talk to Sales</a>
   </div>
 </div>
 
 <footer>
   <div class="footer-inner">
-    <div class="footer-brand">TimeClock <span>365</span><p>Time Tracking + Door Access Control in One System</p></div>
+    <div class="footer-brand">
+      TimeClock <span>365</span>
+      <p>Time Tracking + Door Access Control in One System</p>
+    </div>
     <div class="footer-links">
-      <a href="/timeclock365-landings/door-access-control/">Door Access Control</a>
-      <a href="/timeclock365-landings/time-tracking/">Time Tracking</a>
-      <a href="/timeclock365-landings/pricing/">Pricing</a>
-      <a href="/timeclock365-landings/demo/">Book a Demo</a>
-      <a href="https://timeclock365.com">timeclock365.com</a>
+      <a href="https://yanatimeclock365.github.io/timeclock365-landings/door-access-control/">Door Access Control</a>
+      <a href="https://yanatimeclock365.github.io/timeclock365-landings/time-tracking/">Time Tracking</a>
+      <a href="https://yanatimeclock365.github.io/timeclock365-landings/pricing/">Pricing</a>
+      <a href="https://yanatimeclock365.github.io/timeclock365-landings/demo/">Book a Demo</a>
+      <a href="https://timeclock365.com" target="_blank" rel="noopener">timeclock365.com</a>
     </div>
     <p class="footer-copy">© 2026 TimeClock 365. GDPR Aligned · ISO 27001</p>
   </div>
